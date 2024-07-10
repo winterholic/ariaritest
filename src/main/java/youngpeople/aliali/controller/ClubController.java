@@ -1,8 +1,10 @@
 package youngpeople.aliali.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import youngpeople.aliali.controller.swagger.SwaggerAuth;
@@ -43,12 +45,12 @@ public class ClubController {
         return clubService.findBookmarkClubs(kakaoId);
     }
 
-    @PostMapping
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     @SwaggerAuth
     @ClubRegisterExplain
     public BasicResDto registerClub(HttpServletRequest request,
-                                    @RequestBody ClubReqDto clubReqDto,
-                                    @RequestParam("image") MultipartFile imageFile) {
+                                    @Parameter(description = "첨부파일") @RequestPart(name = "imageFile") MultipartFile imageFile,
+                                    @Parameter(description = "dto") @RequestPart(name = "data") ClubReqDto clubReqDto) {
         String kakaoId = getKakaoId(request);
         return clubService.registerClub(clubReqDto, kakaoId, imageFile);
     }
@@ -56,13 +58,13 @@ public class ClubController {
     /**
      * 이미지 데이터 저장 추가 해야하져? -> 일단 했습니다.
      */
-    @PutMapping("/{clubId}")
+    @PutMapping(value = "/{clubId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     @SwaggerAuth
     @ClubPutExplain
     public BasicResDto updateClub(HttpServletRequest request,
-                                 @PathVariable(name = "clubId") Long clubId,
-                                 @RequestBody ClubReqDto clubReqDto,
-                                 @RequestParam("profile") MultipartFile imageFile) {
+                                  @PathVariable(name = "clubId") Long clubId,
+                                  @Parameter(description = "첨부파일") @RequestPart(name = "imageFile") MultipartFile imageFile,
+                                  @Parameter(description = "dto") @RequestPart(name = "data") ClubReqDto clubReqDto) {
         String kakaoId = getKakaoId(request);
         return clubService.updateClub(clubId, clubReqDto, kakaoId, imageFile);
     }
