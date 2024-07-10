@@ -81,5 +81,4 @@ public class ClubController {
     private String getKakaoId(HttpServletRequest request) {
         return (String) request.getAttribute("kakaoId");
     }
-
 }
