@@ -1,2 +1,6 @@
-package youngpeople.aliali.entity.enumerated;public class PostType {
+package youngpeople.aliali.entity.enumerated;
+
+public enum PostType {
+    GENERAL,
+    NOTICE
 }
