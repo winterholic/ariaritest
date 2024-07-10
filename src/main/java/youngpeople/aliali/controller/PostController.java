@@ -41,6 +41,8 @@ public class PostController {
 //
 //    }
 
+
+
     private String getKakaoId(HttpServletRequest request) {
         return (String) request.getAttribute("kakaoId");
     }

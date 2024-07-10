@@ -103,7 +103,7 @@ public class ApplyDto {
     @Data
     @NoArgsConstructor
     public static class ApplyProcessingDto {
-        private List<Long> applyProcessingId = new ArrayList<>();
+        private List<Long> applyProcessingList = new ArrayList<>();
     }
 
     @Data
