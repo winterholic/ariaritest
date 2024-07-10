@@ -8,11 +8,14 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import youngpeople.aliali.controller.swagger.SwaggerAuth;
+import youngpeople.aliali.controller.swagger.SwaggerExplain;
 import youngpeople.aliali.dto.BasicResDto;
 import youngpeople.aliali.dto.PostDto;
 import youngpeople.aliali.service.PostService;
 
 import java.util.List;
+
+import static youngpeople.aliali.controller.swagger.SwaggerExplain.*;
 
 @Slf4j
 @RestController
@@ -23,6 +26,7 @@ public class PostController {
 
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     @SwaggerAuth
+    @WritePostExplain
     public BasicResDto addPost(HttpServletRequest request,
                                @PathVariable("clubId") Long clubId,
                                @Parameter(description = "imageFiles") @RequestPart(name = "imageFiles") List<MultipartFile> imageFiles,
