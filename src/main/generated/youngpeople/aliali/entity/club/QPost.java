@@ -38,6 +38,10 @@ public class QPost extends EntityPathBase<Post> {
 
     public final ListPath<youngpeople.aliali.entity.Image, youngpeople.aliali.entity.QImage> images = this.<youngpeople.aliali.entity.Image, youngpeople.aliali.entity.QImage>createList("images", youngpeople.aliali.entity.Image.class, youngpeople.aliali.entity.QImage.class, PathInits.DIRECT2);
 
+    public final youngpeople.aliali.entity.member.QMember member;
+
+    public final EnumPath<youngpeople.aliali.entity.enumerated.PostType> postType = createEnum("postType", youngpeople.aliali.entity.enumerated.PostType.class);
+
     public final StringPath text = createString("text");
 
     public final StringPath title = createString("title");
@@ -64,6 +68,7 @@ public class QPost extends EntityPathBase<Post> {
     public QPost(Class<? extends Post> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.club = inits.isInitialized("club") ? new QClub(forProperty("club"), inits.get("club")) : null;
+        this.member = inits.isInitialized("member") ? new youngpeople.aliali.entity.member.QMember(forProperty("member"), inits.get("member")) : null;
     }
 
 }
