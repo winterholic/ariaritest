@@ -43,7 +43,9 @@ public class ApplyController {
                                      @PathVariable(name = "recruitmentId") Long recruitmentId,
                                      @RequestBody ApplyReqDto applyReqDto) {
         String kakaoId = getKakaoId(request);
-        return applyService.registerApply(kakaoId, recruitmentId, applyReqDto);
+        applyService.registerApply(kakaoId, recruitmentId, applyReqDto);
+        return BasicResDto.builder()
+                .message("successful").build();
     }
 
     @DeleteMapping("/club/{clubId}/recruitment/{recruitmentId}/apply/{applyId}")

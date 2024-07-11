@@ -14,4 +14,6 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 
     Optional<Bookmark> findByMemberAndClub(Member member, Club club);
 
+    List<Bookmark> findByClub(Club club);
+
 }

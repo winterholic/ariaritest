@@ -1,7 +1,5 @@
 package youngpeople.aliali.aop.alarm;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import youngpeople.aliali.entity.club.Apply;
 import youngpeople.aliali.entity.club.Club;
 import youngpeople.aliali.entity.club.Recruitment;
@@ -11,19 +9,12 @@ import youngpeople.aliali.entity.enumerated.MemberRole;
 import youngpeople.aliali.entity.member.Member;
 import youngpeople.aliali.repository.BookmarkRepository;
 import youngpeople.aliali.repository.ClubMemberRepository;
-import youngpeople.aliali.repository.MemberRepository;
-import youngpeople.aliali.repository.RecruitmentRepository;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Data
-@AllArgsConstructor
-public class AlarmInfo {
-    private List<Long> receiverIds = new ArrayList<>();
-    private String uri;
-    private String message;
+public class AlarmInfoCreater {
 
     /**
      * - 알림 대상
@@ -39,6 +30,7 @@ public class AlarmInfo {
      *     4. 게시글 :
      *         1. 클럽 내 공지사항 / 게시글 : 클럽 내 모든 멤버
      */
+
     public static AlarmInfo createInfoInRegisterRecruitment(BookmarkRepository bookmarkRepository,
                                                             Recruitment recruitment) {
         List<Bookmark> bookmarks = bookmarkRepository.findByClub(recruitment.getClub());
@@ -87,6 +79,5 @@ public class AlarmInfo {
                 "/club/" + club.getId() + "club-members",
                 "새로운 멤버가 가입했습니다!");
     }
-
 
 }

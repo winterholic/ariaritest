@@ -1,5 +1,6 @@
 package youngpeople.aliali.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -27,13 +28,15 @@ public class LoginController {
         return new CodeResDto(code);
     }
 
-    @PostMapping("/login")
+    @GetMapping("/login")
     public LoginResDto login(@RequestParam(name = "code") String code) throws Exception {
         String kakaoId = kakaoService.getKakaoInfo(code);
 
         String token = memberService.login(kakaoId);
         String accessToken = tokenManager.getAccessToken(token);
         String refreshToken = tokenManager.getRefreshToken(token);
+
+//        response.setHeader("authorization", accessToken);
 
         return LoginResDto.builder()
                 .message("successful")

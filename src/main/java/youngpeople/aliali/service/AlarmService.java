@@ -32,9 +32,9 @@ public class AlarmService {
         return fromEntity("successful", member.getAlarms());
     }
 
-    public BasicResDto checkAlarm(String kakaoId, Long signalId) {
+    public BasicResDto checkAlarm(String kakaoId, Long alarmId) {
         Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
-        Alarm alarm = alarmRepository.findById(signalId).orElseThrow(NotFoundEntityException::new);
+        Alarm alarm = alarmRepository.findById(alarmId).orElseThrow(NotFoundEntityException::new);
 
         if (!member.equals(alarm.getMember())) {
             throw new NotMatchedEntitiesException();
@@ -46,13 +46,29 @@ public class AlarmService {
                 .message("successful").build();
     }
 
-    public void createAlarms(Long receiverId, AlarmInfo alarmInfo) {
+    public BasicResDto deleteAlarm(String kakoId, Long alarmId) {
+        Member member = memberRepository.findByKakaoId(kakoId).orElseThrow(NotFoundEntityException::new);
+        Alarm alarm = alarmRepository.findById(alarmId).orElseThrow(NotFoundEntityException::new);
+
+        if (!member.equals(alarm.getMember())) {
+            throw new NotMatchedEntitiesException();
+        }
+
+        alarmRepository.delete(alarm);
+
+        return BasicResDto.builder()
+                .message("successful").build();
+    }
+
+    public void createAlarms(AlarmInfo alarmInfo) {
         String message = alarmInfo.getMessage();
         String uri = alarmInfo.getUri();
 
-        Member member = memberRepository.findById(receiverId).orElseThrow(NotFoundEntityException::new);
-        Alarm alarm = new Alarm(message, uri, member);
-        alarmRepository.save(alarm);
+        for (Long receiverId : alarmInfo.getReceiverIds()) {
+            Member member = memberRepository.findById(receiverId).orElseThrow(NotFoundEntityException::new);
+            Alarm alarm = new Alarm(message, uri, member);
+            alarmRepository.save(alarm);
+        }
     }
 
 }

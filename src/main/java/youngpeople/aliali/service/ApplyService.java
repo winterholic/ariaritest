@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import youngpeople.aliali.aop.alarm.AlarmInfo;
 import youngpeople.aliali.dto.BasicResDto;
 import youngpeople.aliali.entity.club.*;
 import youngpeople.aliali.entity.clubmember.ClubMember;
@@ -64,7 +65,7 @@ public class ApplyService {
     /**
      * school이 있는 경우 member의 school과 같아야 하는 조건 추가
      */
-    public BasicResDto registerApply(String kakaoId, Long recruitmentId, ApplyReqDto applyReqDto) {
+    public AlarmInfo registerApply(String kakaoId, Long recruitmentId, ApplyReqDto applyReqDto) {
         Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
         Recruitment recruitment = recruitmentRepository.findById(recruitmentId).orElseThrow(NotFoundEntityException::new);
         Club club = recruitment.getClub();
@@ -88,8 +89,10 @@ public class ApplyService {
 
         applyRepository.save(apply);
 
-        return BasicResDto.builder()
-                .message("successful").build();
+        /**
+         * return AlarmInfo
+         */
+        return null;
     }
 
     public BasicResDto deleteApply(String kakaoId, Long applyId) {

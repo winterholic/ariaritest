@@ -3,6 +3,7 @@ package youngpeople.aliali.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import youngpeople.aliali.entity.club.Club;
 import youngpeople.aliali.entity.clubmember.ClubMember;
+import youngpeople.aliali.entity.enumerated.MemberRole;
 import youngpeople.aliali.entity.member.Member;
 
 import java.util.List;
@@ -15,4 +16,6 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
     List<ClubMember> findByMember(Member member);
 
     boolean existsByMemberAndClub(Member member, Club club);
+
+    List<ClubMember> findByClubAndMemberRoleNotLike(Club club, MemberRole memberRole);
 }

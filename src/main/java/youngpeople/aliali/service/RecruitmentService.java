@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import youngpeople.aliali.aop.alarm.AlarmInfo;
+import youngpeople.aliali.aop.alarm.AlarmTargetMethod;
 import youngpeople.aliali.dto.BasicResDto;
 import youngpeople.aliali.entity.club.Club;
 import youngpeople.aliali.entity.club.Question;
@@ -34,6 +36,7 @@ public class RecruitmentService {
     private final ClubRepository clubRepository;
     private final ClubMemberRepository clubMemberRepository;
     private final QuestionRepository questionRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     /**
      * 미사용 예정
@@ -70,9 +73,10 @@ public class RecruitmentService {
                 club, recruitment, currentApply, recruitmentState, questions);
     }
 
-    public BasicResDto registerRecruitment(String kakaoId, Long clubId,
-                                           RecruitmentReqDto recruitmentReqDto,
-                                           String profileUrl) {
+    @AlarmTargetMethod
+    public AlarmInfo registerRecruitment(String kakaoId, Long clubId,
+                                         RecruitmentReqDto recruitmentReqDto,
+                                         String profileUrl) {
         Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
         Club club = clubRepository.findById(clubId).orElseThrow(NotFoundEntityException::new);
         ClubMember myClubMember = clubMemberRepository.findByMemberAndClub(member, club).orElseThrow(NotFoundEntityException::new);
@@ -86,8 +90,7 @@ public class RecruitmentService {
         recruitmentRepository.save(recruitment);
         questionRepository.saveAll(toQuestionEntities(recruitmentReqDto, recruitment));
 
-        return BasicResDto.builder()
-                .message("successful").build();
+        return AlarmInfo.createInfoInRegisterRecruitment(bookmarkRepository, recruitment);
     }
 
     /**

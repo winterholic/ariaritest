@@ -59,7 +59,11 @@ public class RecruitmentController {
                                            @RequestBody RecruitmentReqDto recruitmentReqDto) {
         String profileUrl = imageManager.imageSave(profile);
         String kakaoId = getKakaoId(request);
-        return recruitmentService.registerRecruitment(kakaoId, clubId, recruitmentReqDto, profileUrl);
+
+        recruitmentService.registerRecruitment(kakaoId, clubId, recruitmentReqDto, profileUrl);
+
+        return BasicResDto.builder()
+                .message("successful").build();
     }
 
     /**

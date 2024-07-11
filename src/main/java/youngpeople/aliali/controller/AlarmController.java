@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import youngpeople.aliali.controller.swagger.SwaggerAuth;
+import youngpeople.aliali.dto.BasicResDto;
 import youngpeople.aliali.service.AlarmService;
 
 import static youngpeople.aliali.dto.AlarmDto.*;
@@ -19,25 +20,23 @@ public class AlarmController {
 
     @GetMapping("/list")
     @SwaggerAuth
-    public AlarmsResDto getSignals(HttpServletRequest request) {
+    public AlarmsResDto getAlarms(HttpServletRequest request) {
         String kakaoId = getKakaoId(request);
         return alarmService.findAlarms(kakaoId);
     }
 
-    /**
-     * 개발 중
-     */
     @GetMapping("/{alarmId}")
     @SwaggerAuth
-    public void checkSignal(HttpServletRequest request, @PathVariable(name = "alarmId") Long alarmId) {
+    public BasicResDto checkAlarm(HttpServletRequest request, @PathVariable(name = "alarmId") Long alarmId) {
         String kakaoId = getKakaoId(request);
-
+        return alarmService.checkAlarm(kakaoId, alarmId);
     }
 
     @DeleteMapping ("/{alarmId}")
     @SwaggerAuth
-    public void deleteSignal(HttpServletRequest request, @PathVariable(name = "alarmId") Long alarmId) {
+    public BasicResDto deleteAlarm(HttpServletRequest request, @PathVariable(name = "alarmId") Long alarmId) {
         String kakaoId = getKakaoId(request);
+        return alarmService.deleteAlarm(kakaoId, alarmId);
     }
 
     private String getKakaoId(HttpServletRequest request) {

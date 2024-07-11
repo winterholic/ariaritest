@@ -22,7 +22,6 @@ public class SchoolDto {
 
 
     @Data
-    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class SchoolsResDto {
