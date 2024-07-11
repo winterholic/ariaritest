@@ -468,4 +468,14 @@ public class SwaggerExplain {
     @Retention(RetentionPolicy.RUNTIME)
     public @interface ApplyMyRefuseExplain {
     }
+
+    //postcontroller
+    @Operation(
+            summary = "게시글 작성하기(스웨거 테스트 불가능)",
+            description = "스웨거 테스트 불가능"
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface WritePostExplain {
+    }
 }

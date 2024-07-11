@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import youngpeople.aliali.controller.swagger.SwaggerAuth;
@@ -50,14 +51,14 @@ public class RecruitmentController {
     /**
      * image 처리 수정
      */
-    @PostMapping
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     @SwaggerAuth
     @RecruitmentRegisterExplain
     public BasicResDto registerRecruitment(HttpServletRequest request,
-                                           @Parameter(description = "첨부파일") @RequestPart(name = "profile") MultipartFile profile,
+                                           @Parameter(description = "첨부파일") @RequestPart(name = "imageFile") MultipartFile imageFile,
                                            @PathVariable(name = "clubId") Long clubId,
-                                           @RequestBody RecruitmentReqDto recruitmentReqDto) {
-        String profileUrl = imageManager.imageSave(profile);
+                                           @Parameter(description = "dto") @RequestPart(name = "data") RecruitmentReqDto recruitmentReqDto) {
+        String profileUrl = imageManager.imageSave(imageFile);
         String kakaoId = getKakaoId(request);
 
         recruitmentService.registerRecruitment(kakaoId, clubId, recruitmentReqDto, profileUrl);
@@ -69,15 +70,15 @@ public class RecruitmentController {
     /**
      * image 처리 수정
      */
-    @PutMapping("/{recruitmentId}")
+    @PutMapping(value = "/{recruitmentId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     @SwaggerAuth
     @RecruitmentRegisterModifyExplain
     public BasicResDto updateRecruitment(HttpServletRequest request,
-                                         @Parameter(description = "첨부파일") @RequestPart(name = "profile") MultipartFile profile,
+                                         @Parameter(description = "첨부파일") @RequestPart(name = "imageFile") MultipartFile imageFile,
                                          @PathVariable(name = "clubId") Long clubId,
                                          @PathVariable(name = "recruitmentId") Long recruitmentId,
-                                         @RequestBody RecruitmentReqDto recruitmentReqDto) {
-        String profileUrl = imageManager.imageSave(profile);
+                                         @Parameter(description = "dto") @RequestPart(name = "data") RecruitmentReqDto recruitmentReqDto) {
+        String profileUrl = imageManager.imageSave(imageFile);
         String kakaoId = getKakaoId(request);
         return recruitmentService.updateRecruitment(kakaoId, clubId, recruitmentId, recruitmentReqDto, profileUrl);
     }
