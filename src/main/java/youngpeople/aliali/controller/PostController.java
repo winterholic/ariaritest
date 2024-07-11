@@ -31,7 +31,7 @@ public class PostController {
                                @PathVariable("clubId") Long clubId,
                                @Parameter(description = "imageFiles") @RequestPart(name = "imageFiles") List<MultipartFile> imageFiles,
                                @Parameter(description = "postReqDto") @RequestPart(name = "postReqDto") PostDto.PostReqDto postReqDto){
-        log.info("♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠{}, {}, {}", clubId, postReqDto, imageFiles);
+//        log.info("♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠♠{}, {}, {}", clubId, postReqDto, imageFiles);
         String kakaoId = getKakaoId(request);
         return postService.SavePost(postReqDto, clubId, kakaoId, imageFiles);
     }
