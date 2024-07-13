@@ -1,4 +1,4 @@
-package youngpeople.aliali.aop.alarm;
+package youngpeople.aliali.alarm.aop;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

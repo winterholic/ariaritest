@@ -101,8 +101,8 @@ public class ApplyDto {
     }
 
     @Data
-    @NoArgsConstructor
     public static class ApplyProcessingDto {
+        private ResultType state;
         private List<Long> applyProcessingId = new ArrayList<>();
     }
 

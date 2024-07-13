@@ -61,26 +61,18 @@ public class ApplyController {
      *
      * 의도 파악 후 수정
      */
-    @PostMapping("/club/{clubId}/recruitment/{recruitmentId}/apply/approve")
+    @PostMapping("/club/{clubId}/recruitment/{recruitmentId}/apply/judge")
     @SwaggerAuth
     @ApplyClubApproveListExplain
-    public BasicResDto approveMember(HttpServletRequest request,
+    public BasicResDto judgeApplies(HttpServletRequest request,
                                      @PathVariable(name = "clubId") Long clubId,
                                      @RequestBody ApplyProcessingDto applyProcessingDto){
         String kakaoId = getKakaoId(request);
-        return applyService.approvalProcessing(kakaoId, clubId, applyProcessingDto);
-    }
+        applyService.judgeApplies(kakaoId, clubId, applyProcessingDto);
 
-    @PostMapping("/club/{clubId}/recruitment/{recruitmentId}/apply/refuse")
-    @SwaggerAuth
-    @ApplyClubRefuseListExplain
-    public BasicResDto refuseMember(HttpServletRequest request,
-                                     @PathVariable(name = "clubId") Long clubId,
-                                     @RequestBody ApplyProcessingDto applyProcessingDto){
-        String kakaoId = getKakaoId(request);
-        return applyService.refusalProcessing(kakaoId, clubId, applyProcessingDto);
+        return BasicResDto.builder()
+                .message("successful").build();
     }
-
 
     @GetMapping("/my/apply/list")
     @SwaggerAuth
@@ -96,7 +88,10 @@ public class ApplyController {
     public BasicResDto approveIndividual(HttpServletRequest request,
                                          @PathVariable(name = "applyId") Long applyId) {
         String kakaoId = getKakaoId(request);
-        return applyService.approveMyApply(kakaoId, applyId);
+        applyService.approveMyApply(kakaoId, applyId);
+
+        return BasicResDto.builder()
+                .message("successful").build();
     }
 
     @PostMapping("/my/apply/{applyId}/refuse")
@@ -105,7 +100,10 @@ public class ApplyController {
     public BasicResDto refuseIndividual(HttpServletRequest request,
                                         @PathVariable(name = "applyId") Long applyId) {
         String kakaoId = getKakaoId(request);
-        return applyService.refuseMyApply(kakaoId, applyId);
+        applyService.refuseMyApply(kakaoId, applyId);
+
+        return BasicResDto.builder()
+                .message("successful").build();
     }
 
     private String getKakaoId(HttpServletRequest request) {

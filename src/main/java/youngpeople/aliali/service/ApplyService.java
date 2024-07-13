@@ -4,7 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import youngpeople.aliali.aop.alarm.AlarmInfo;
+import youngpeople.aliali.alarm.AlarmInfo;
+import youngpeople.aliali.alarm.aop.AlarmInfoCreatorForAop;
 import youngpeople.aliali.dto.BasicResDto;
 import youngpeople.aliali.entity.club.*;
 import youngpeople.aliali.entity.clubmember.ClubMember;
@@ -14,6 +15,9 @@ import youngpeople.aliali.entity.member.Member;
 import youngpeople.aliali.exception.apply.ApplyAuthorityException;
 import youngpeople.aliali.exception.apply.ExistingApplyException;
 import youngpeople.aliali.exception.apply.ExistingClubMemberException;
+import youngpeople.aliali.exception.apply.NotPendencyApplyException;
+import youngpeople.aliali.exception.clubmember.ClubMemberRoleAdminException;
+import youngpeople.aliali.exception.clubmember.ClubMemberRoleException;
 import youngpeople.aliali.exception.common.NotFoundEntityException;
 import youngpeople.aliali.repository.*;
 
@@ -89,10 +93,7 @@ public class ApplyService {
 
         applyRepository.save(apply);
 
-        /**
-         * return AlarmInfo
-         */
-        return null;
+        return AlarmInfoCreatorForAop.createInfoInRegisterApply(clubMemberRepository, recruitment);
     }
 
     public BasicResDto deleteApply(String kakaoId, Long applyId) {
@@ -109,65 +110,25 @@ public class ApplyService {
                 .message("successful").build();
     }
 
-    /********************************************************************************
-     *
-     * 의도 파악 후 수정
-     */
-
-    public BasicResDto approvalProcessing(String kakaoId, Long clubId, ApplyProcessingDto applyProcessingDto) {
+    public AlarmInfo judgeApplies(String kakaoId, Long clubId, ApplyProcessingDto applyProcessingDto) {
         Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
         Club club = clubRepository.findById(clubId).orElseThrow(NotFoundEntityException::new);
-        Optional<ClubMember> myClubMember = clubMemberRepository.findByMemberAndClub(member, club);
+        ClubMember myClubMember = clubMemberRepository.findByMemberAndClub(member, club).orElseThrow(ClubMemberRoleException::new);
 
-        if (myClubMember.isEmpty() || myClubMember.get().getMemberRole() == MemberRole.GENERAL) {
-            // 익셉션
+        if (myClubMember.getMemberRole().equals(MemberRole.GENERAL)) {
+            throw new ClubMemberRoleAdminException();
         }
 
-        List<Long> approveProcessingIdList = applyProcessingDto.getApplyProcessingId();
-
-        for (Long id : approveProcessingIdList) {
-            Apply apply = applyRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("apply doesn't exist"));
-
-            if (apply.getResultType() != ResultType.PENDENCY){
-                // 익셉션
+        List<Apply> applies = applyRepository.findAllById(applyProcessingDto.getApplyProcessingId());
+        for (Apply apply : applies) {
+            if (!apply.getResultType().equals(ResultType.PENDENCY)) {
+                throw new NotPendencyApplyException();
             }
 
-            // applyType의 상태 변경
-            apply.setResultType(ResultType.STANDBY);
-            applyRepository.save(apply);
+            apply.setResultType(ResultType.APPROVE);
         }
 
-        return BasicResDto.builder()
-                .message("successful")
-                .build();
-    }
-
-    public BasicResDto refusalProcessing(String kakaoId, Long clubId, ApplyProcessingDto applyProcessingDto) {
-        Member member = memberRepository.findByKakaoId(kakaoId).get();
-        Club club = clubRepository.findById(clubId).get();
-
-        Optional<ClubMember> myClubMember = clubMemberRepository.findByMemberAndClub(member, club);
-
-        if (myClubMember.isEmpty() || myClubMember.get().getMemberRole() == MemberRole.GENERAL) {
-            // 익셉션
-        }
-
-        List<Long> approveProcessingIdList = applyProcessingDto.getApplyProcessingId();
-
-        for (Long id : approveProcessingIdList) {
-            Apply apply = applyRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("apply doesn't exist"));
-            if (apply.getResultType() != ResultType.PENDENCY){
-                // 익셉션
-            }
-
-            // applyType의 상태 변경
-            apply.setResultType(ResultType.REFUSAL);
-            applyRepository.save(apply);
-        }
-
-        return BasicResDto.builder()
-                .message("successful")
-                .build();
+        return AlarmInfoCreatorForAop.createInfoInJudgeApplies(applies);
     }
 
     public MyAppliesDto findMyApplies(String kakaoId){
@@ -182,7 +143,7 @@ public class ApplyService {
     }
 
 
-    public BasicResDto approveMyApply(String kakaoId, Long applyId) {
+    public AlarmInfo approveMyApply(String kakaoId, Long applyId) {
         Member member = memberRepository.findByKakaoId(kakaoId).get();
         Apply apply = applyRepository.findById(applyId).orElseThrow(() -> new IllegalArgumentException("apply doesn't exist"));
 
@@ -205,9 +166,7 @@ public class ApplyService {
             clubMemberRepository.save(new ClubMember(member, club));
         }
 
-        return BasicResDto.builder()
-                .message(myMessage)
-                .build();
+        return AlarmInfoCreatorForAop.createInfoInJoinClub(clubMemberRepository, apply);
     }
 
     public BasicResDto refuseMyApply(String kakaoId, Long applyId) {

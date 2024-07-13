@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import youngpeople.aliali.aop.alarm.AlarmInfo;
-import youngpeople.aliali.aop.alarm.AlarmTargetMethod;
+import youngpeople.aliali.alarm.AlarmInfo;
+import youngpeople.aliali.alarm.aop.AlarmInfoCreatorForAop;
+import youngpeople.aliali.alarm.aop.AlarmTargetMethod;
 import youngpeople.aliali.dto.BasicResDto;
 import youngpeople.aliali.entity.club.Club;
 import youngpeople.aliali.entity.club.Question;
@@ -90,7 +91,7 @@ public class RecruitmentService {
         recruitmentRepository.save(recruitment);
         questionRepository.saveAll(toQuestionEntities(recruitmentReqDto, recruitment));
 
-        return AlarmInfo.createInfoInRegisterRecruitment(bookmarkRepository, recruitment);
+        return AlarmInfoCreatorForAop.createInfoInRegisterRecruitment(bookmarkRepository, recruitment);
     }
 
     /**

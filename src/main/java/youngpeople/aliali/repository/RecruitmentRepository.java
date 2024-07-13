@@ -20,4 +20,6 @@ public interface RecruitmentRepository extends JpaRepository<Recruitment, Long> 
     List<Recruitment> findByClub_SchoolAndEndDateAfter(School school, LocalDateTime localDateTime);
 
     List<Recruitment> findByClub_SchoolIsNullAndEndDateAfter(LocalDateTime localDateTime);
+
+    List<Recruitment> findByEndDateBetween(LocalDateTime start, LocalDateTime end);
 }
