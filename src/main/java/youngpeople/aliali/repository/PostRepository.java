@@ -10,5 +10,8 @@ import org.springframework.data.domain.Pageable;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
-    Page<Post> findByClubIdAndPostTypeAndFixed(Long clubId, PostType postType, Pageable pageable, boolean Fixed);
+    Page<Post> findByClubIdAndPostTypeAndFixedOrderByCreatedDateDesc(Long clubId, PostType postType, boolean Fixed, Pageable pageable);
+    Page<Post> findByClubId(Long clubId, Pageable pageable);
+    Page<Post> findByPostType(PostType postType, Pageable pageable);
+    Page<Post> findByFixed(boolean Fixed, Pageable pageable);
 }

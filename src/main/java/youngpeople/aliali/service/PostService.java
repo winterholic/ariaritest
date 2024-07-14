@@ -2,6 +2,7 @@ package youngpeople.aliali.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,6 +12,7 @@ import youngpeople.aliali.entity.Image;
 import youngpeople.aliali.entity.club.Club;
 import youngpeople.aliali.entity.club.Post;
 import youngpeople.aliali.entity.enumerated.ImageTargetType;
+import youngpeople.aliali.entity.enumerated.PostType;
 import youngpeople.aliali.entity.member.Member;
 import youngpeople.aliali.exception.common.NotFoundEntityException;
 import youngpeople.aliali.manager.ImageManager;
@@ -21,8 +23,10 @@ import youngpeople.aliali.repository.PostRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
-import static youngpeople.aliali.dto.PostDto.toEntity;
+import static youngpeople.aliali.dto.PostDto.*;
 
 @Slf4j
 @Service
@@ -61,5 +65,18 @@ public class PostService {
         return BasicResDto.builder()
                 .message("successful")
                 .build();
+    }
+
+    public PostListDto findPostList(Long clubId, int pageIdx, PostType postType){
+        int pageSize = 10;
+        PageRequest pageRequest = PageRequest.of(pageIdx - 1, pageSize);
+
+        Page<Post> normalPage = postRepository.findByClubIdAndPostTypeAndFixedOrderByCreatedDateDesc(clubId, postType, false, pageRequest);
+        List<Post> normalPosts = normalPage.hasContent() ? normalPage.getContent() : List.of();
+
+        Page<Post> fixedPage = postRepository.findByClubIdAndPostTypeAndFixedOrderByCreatedDateDesc(clubId, postType, true, PageRequest.of(0, 5));
+        List<Post> fixedPosts = fixedPage.hasContent() ? fixedPage.getContent() : List.of();
+
+        return new PostListDto("successful", normalPosts, fixedPosts);
     }
 }
