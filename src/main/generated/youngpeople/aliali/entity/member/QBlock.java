@@ -22,11 +22,11 @@ public class QBlock extends EntityPathBase<Block> {
 
     public static final QBlock block = new QBlock("block");
 
-    public final QMember blockedMember;
-
-    public final QMember blockingMember;
-
     public final NumberPath<Long> id = createNumber("id", Long.class);
+
+    public final QMember member;
+
+    public final QMember target;
 
     public QBlock(String variable) {
         this(Block.class, forVariable(variable), INITS);
@@ -46,8 +46,8 @@ public class QBlock extends EntityPathBase<Block> {
 
     public QBlock(Class<? extends Block> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.blockedMember = inits.isInitialized("blockedMember") ? new QMember(forProperty("blockedMember"), inits.get("blockedMember")) : null;
-        this.blockingMember = inits.isInitialized("blockingMember") ? new QMember(forProperty("blockingMember"), inits.get("blockingMember")) : null;
+        this.member = inits.isInitialized("member") ? new QMember(forProperty("member"), inits.get("member")) : null;
+        this.target = inits.isInitialized("target") ? new QMember(forProperty("target"), inits.get("target")) : null;
     }
 
 }

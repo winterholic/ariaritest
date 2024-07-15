@@ -5,16 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import youngpeople.aliali.dto.BasicResDto;
-import youngpeople.aliali.entity.club.Apply;
 import youngpeople.aliali.entity.club.Club;
 import youngpeople.aliali.entity.clubmember.ClubMember;
 import youngpeople.aliali.entity.enumerated.MemberRole;
-import youngpeople.aliali.entity.enumerated.ResultType;
 import youngpeople.aliali.entity.member.Member;
-import youngpeople.aliali.exception.clubmember.ClubMemberRoleAdminException;
+import youngpeople.aliali.exception.clubmember.ClubMemberRemoveAdminException;
 import youngpeople.aliali.exception.clubmember.ClubMemberRoleException;
 import youngpeople.aliali.exception.common.NotFoundEntityException;
-import youngpeople.aliali.repository.ApplyRepository;
 import youngpeople.aliali.repository.ClubMemberRepository;
 import youngpeople.aliali.repository.ClubRepository;
 import youngpeople.aliali.repository.MemberRepository;
@@ -22,7 +19,6 @@ import youngpeople.aliali.repository.MemberRepository;
 import static youngpeople.aliali.dto.ClubMemberDto.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -67,7 +63,7 @@ public class ClubMemberService {
              * 클럽 Admin 이전에 대한 요구사항 필요
              */
             if (clubMember.getMemberRole().equals(MemberRole.ADMIN)) {
-                throw new ClubMemberRoleAdminException();
+                throw new ClubMemberRemoveAdminException();
             }
 
             clubMember.setMemberRole(reqDto.getMemberRole());
@@ -94,7 +90,7 @@ public class ClubMemberService {
             ClubMember clubMember = clubMemberRepository.findById(id).orElseThrow(NotFoundEntityException::new);
 
             if (clubMember.getMemberRole().equals(MemberRole.ADMIN)) {
-                throw new ClubMemberRoleAdminException();
+                throw new ClubMemberRemoveAdminException();
             }
 
             clubMemberRepository.delete(clubMember);
@@ -114,7 +110,7 @@ public class ClubMemberService {
         ClubMember myClubMember = clubMemberRepository.findByMemberAndClub(member, club).orElseThrow(NotFoundEntityException::new);
 
         if (myClubMember.getMemberRole().equals(MemberRole.ADMIN)) {
-            throw new ClubMemberRoleAdminException();
+            throw new ClubMemberRemoveAdminException();
         }
 
         clubMemberRepository.delete(myClubMember);

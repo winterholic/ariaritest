@@ -54,6 +54,12 @@ public class Member extends BaseEntity  {
     @OneToMany(mappedBy = "member")
     private List<Alarm> alarms = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member")
+    private List<Block> blockings = new ArrayList<>();
+
+    @OneToMany(mappedBy = "target")
+    private List<Block> blockeds = new ArrayList<>();
+
     /**
      * for test
      */

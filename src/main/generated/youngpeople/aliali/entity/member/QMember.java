@@ -31,6 +31,10 @@ public class QMember extends EntityPathBase<Member> {
 
     public final ListPath<youngpeople.aliali.entity.club.Apply, youngpeople.aliali.entity.club.QApply> applies = this.<youngpeople.aliali.entity.club.Apply, youngpeople.aliali.entity.club.QApply>createList("applies", youngpeople.aliali.entity.club.Apply.class, youngpeople.aliali.entity.club.QApply.class, PathInits.DIRECT2);
 
+    public final ListPath<Block, QBlock> blockeds = this.<Block, QBlock>createList("blockeds", Block.class, QBlock.class, PathInits.DIRECT2);
+
+    public final ListPath<Block, QBlock> blockings = this.<Block, QBlock>createList("blockings", Block.class, QBlock.class, PathInits.DIRECT2);
+
     public final ListPath<youngpeople.aliali.entity.clubmember.Bookmark, youngpeople.aliali.entity.clubmember.QBookmark> bookmarks = this.<youngpeople.aliali.entity.clubmember.Bookmark, youngpeople.aliali.entity.clubmember.QBookmark>createList("bookmarks", youngpeople.aliali.entity.clubmember.Bookmark.class, youngpeople.aliali.entity.clubmember.QBookmark.class, PathInits.DIRECT2);
 
     public final ListPath<youngpeople.aliali.entity.clubmember.ClubMember, youngpeople.aliali.entity.clubmember.QClubMember> clubMembers = this.<youngpeople.aliali.entity.clubmember.ClubMember, youngpeople.aliali.entity.clubmember.QClubMember>createList("clubMembers", youngpeople.aliali.entity.clubmember.ClubMember.class, youngpeople.aliali.entity.clubmember.QClubMember.class, PathInits.DIRECT2);
