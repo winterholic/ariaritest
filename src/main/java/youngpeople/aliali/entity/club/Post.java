@@ -47,6 +47,8 @@ public class Post extends BaseEntity {
     private Member member;
     
     // 댓글기능 추가
+    @OneToMany(fetch = LAZY)
+    private List<Comment> comments = new ArrayList<>();
 
     public Post(String title, String text, Boolean fixed, PostType postType, Club club, Member member) {
         this.title = title;

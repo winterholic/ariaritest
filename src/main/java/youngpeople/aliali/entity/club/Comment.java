@@ -9,6 +9,9 @@ import org.hibernate.annotations.Where;
 import youngpeople.aliali.entity.BaseEntity;
 import youngpeople.aliali.entity.member.Member;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
@@ -35,6 +38,9 @@ public class Comment extends BaseEntity {
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "parent_comment_id")
     private Comment parentComment;
+
+    @OneToMany(fetch = LAZY)
+    private List<Comment> childrenComments = new ArrayList<>();
 
     public Comment(Post post, Member member, String text, Boolean secret, Comment parentComment) {
         this.post = post;

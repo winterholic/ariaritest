@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import youngpeople.aliali.entity.Image;
 import youngpeople.aliali.entity.club.Club;
+import youngpeople.aliali.entity.club.Comment;
 import youngpeople.aliali.entity.club.Post;
 import youngpeople.aliali.entity.enumerated.PostType;
 import youngpeople.aliali.entity.member.Member;
@@ -38,29 +39,29 @@ public class PostDto {
     @NoArgsConstructor
     public static class PostListDto{
         private String message;
-        private List<PostBriefContent> normalPostList = new ArrayList<>();
-        private List<PostBriefContent> fixedPostList = new ArrayList<>();
+        private List<PostSimpleContent> normalPostList = new ArrayList<>();
+        private List<PostSimpleContent> fixedPostList = new ArrayList<>();
         public PostListDto(String message, List<Post> normalPosts, List<Post> fixedPosts) {
             this.message = message;
             for(Post post : normalPosts){
-                this.normalPostList.add(new PostBriefContent(post));
+                this.normalPostList.add(new PostSimpleContent(post));
             }
             for(Post post : fixedPosts){
-                this.fixedPostList.add(new PostBriefContent(post));
+                this.fixedPostList.add(new PostSimpleContent(post));
             }
         }
     }
 
     @Data
     @NoArgsConstructor
-    public static class PostBriefContent{
+    public static class PostSimpleContent {
         private Long postId;
         private Long memberId;
         private String NickName;
         private String title;
         private LocalDateTime createdDate;
         private String imageUri = "";
-        public PostBriefContent(Post post) {
+        public PostSimpleContent(Post post) {
             this.postId = post.getId();
             this.memberId = post.getMember().getId();
             this.NickName = post.getMember().getNickname();
@@ -74,9 +75,75 @@ public class PostDto {
     @Data
     @NoArgsConstructor
     public static class PostDetailDto{
+        private String message;
         private String title;
         private String text;
-        private List<Image> images;
+        private List<String> images;
+        public PostDetailDto(String message, Post post) {
+            this.message = message;
+            this.title = post.getTitle();
+            this.text = post.getText();
+            for (Image image : post.getImages()) {
+                this.images.add(image.getImageUri());
+            }
+        }
+    }
+
+//    @Data
+//    @NoArgsConstructor
+//    public static class CommentListDto{
+//
+//    }
+//
+    @Data
+    @NoArgsConstructor
+    public static class ParentCommentContent{
+        private Long commentId;
+        private Long memberId;
+        private String nickname;
+        private Integer profile;
+        private String text;
+        private LocalDateTime createdDate;
+        private Boolean secret;
+        private List<ChildCommentContent> childCommentList;
+        public ParentCommentContent(Post post, Comment comment){
+            this.commentId = comment.getId();
+            this.memberId = comment.getMember().getId();
+            this.nickname = comment.getMember().getNickname();
+            this.profile = comment.getMember().getProfile();
+            this.text = comment.getText();
+            this.createdDate = comment.getCreatedDate();
+            this.secret = comment.getSecret();
+            if(comment.getSecret() && post.getMember().equals(comment.getMember())){this.secret = false;}
+            for(Comment childComment : comment.getChildrenComments()){
+
+            }
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class ChildCommentContent{
+        private Long commentId;
+        private Long memberId;
+        private String nickname;
+        private Integer profile;
+        private String text;
+        private LocalDateTime createdDate;
+        private Boolean secret;
+        public ChildCommentContent(Post post, Comment comment){
+            this.commentId = comment.getId();
+            this.memberId = comment.getMember().getId();
+            this.nickname = comment.getMember().getNickname();
+            this.profile = comment.getMember().getProfile();
+            this.text = comment.getText();
+            this.createdDate = comment.getCreatedDate();
+            this.secret = comment.getSecret();
+            if(comment.getSecret() && //글 작성자 or 부모댓글 작성자에게만 비밀댓글해제
+                    (post.getMember().equals(comment.getMember()) || comment.getMember().equals(comment.getParentComment().getMember()))){
+                this.secret = false;
+            }
+        }
     }
 
 

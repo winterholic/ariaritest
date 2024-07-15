@@ -11,6 +11,9 @@ import static jakarta.persistence.FetchType.*;
 /**
  * 개발 및 테스트 시 주의
  */
+/**
+ * 개발 및 테스트 시 주의
+ */
 @Entity
 @NoArgsConstructor
 @Where(clause = "activated = true")
@@ -24,16 +27,17 @@ public class Block {
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn
-    private Member blockingMember;
+    private Member member;
 
     @ManyToOne(fetch = LAZY)
-    @JoinColumn
-    private Member blockedMember;
+    @JoinColumn(name = "target_id")
+    private Member target;
 
-    public Block(Member blockingMember, Member blockedMember) {
-        this.blockingMember = blockingMember;
-        this.blockedMember = blockedMember;
+    public Block(Member blockingMember, Member target) {
+        this.member = blockingMember;
+        this.target = target;
     }
+
 }
 
 /**

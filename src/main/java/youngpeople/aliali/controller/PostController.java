@@ -55,11 +55,19 @@ public class PostController {
         return postService.findPostList(clubId, pageIdx, postType);
     }
 
-//    @GetMapping("{postId}")
+//    @GetMapping("/images")
+//    public ImageListDto
+
+    @GetMapping("/{postId}")
+    @SwaggerAuth
+    public PostDetailDto postDetails(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId){
+        String kakaoId = getKakaoId(request);
+        return postService.findDetailPost(kakaoId, postId);
+    }
+
+//    @GetMapping("/{postId}/comment")
 //    @SwaggerAuth
-//    public PostDetailDto postDetails(@PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId){
-//        return
-//    }
+//    public CommentListDto
 
     private String getKakaoId(HttpServletRequest request) {
         return (String) request.getAttribute("kakaoId");
