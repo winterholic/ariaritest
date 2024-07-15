@@ -26,21 +26,40 @@ import static youngpeople.aliali.controller.swagger.SwaggerExplain.*;
 public class PostController {
     private final PostService postService;
 
-    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(value = "/{postType}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     @SwaggerAuth
     @WritePostExplain
     public BasicResDto postAdd(HttpServletRequest request,
                                @PathVariable("clubId") Long clubId,
+                               @PathVariable("postType") PostType postType,
                                @Parameter(description = "imageFiles") @RequestPart(name = "imageFiles") List<MultipartFile> imageFiles,
                                @Parameter(description = "postReqDto") @RequestPart(name = "postReqDto") PostDto.PostReqDto postReqDto){
         String kakaoId = getKakaoId(request);
-        return postService.SavePost(postReqDto, clubId, kakaoId, imageFiles);
+        return postService.savePost(postReqDto, clubId, postType, kakaoId, imageFiles);
+    }
+
+    @PutMapping(value = "/{postId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @SwaggerAuth
+    //@WritePostExplain
+    public BasicResDto postModify(HttpServletRequest request,
+                               @PathVariable("clubId") Long clubId,
+                               @PathVariable("postId") Long postId,
+                               @Parameter(description = "imageFiles") @RequestPart(name = "imageFiles") List<MultipartFile> imageFiles,
+                               @Parameter(description = "postReqDto") @RequestPart(name = "postReqDto") PostDto.PostReqDto postReqDto){
+        String kakaoId = getKakaoId(request);
+        return postService.modifyPost(postReqDto, clubId, postId, kakaoId, imageFiles);
     }
 
     @GetMapping("/{postType}/list/{pageIdx}")
     public PostListDto generalPostList(@PathVariable("clubId") Long clubId, @PathVariable("postType") PostType postType, @PathVariable("pageIdx") int pageIdx){
         return postService.findPostList(clubId, pageIdx, postType);
     }
+
+//    @GetMapping("{postId}")
+//    @SwaggerAuth
+//    public PostDetailDto postDetails(@PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId){
+//        return
+//    }
 
     private String getKakaoId(HttpServletRequest request) {
         return (String) request.getAttribute("kakaoId");

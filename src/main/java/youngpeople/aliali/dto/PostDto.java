@@ -21,11 +21,17 @@ public class PostDto {
         private String title;
         private String text;
         private Boolean fixed;
-        private PostType type;
     }
 
-    public static Post toEntity(PostDto.PostReqDto PostReqDto, Club club, Member member) {
-        return new Post(PostReqDto.title, PostReqDto.text, PostReqDto.fixed, PostReqDto.type, club, member);
+    public static Post toEntity(PostReqDto postReqDto, Club club, Member member, PostType postType) {
+        return new Post(postReqDto.title, postReqDto.text, postReqDto.fixed, postType, club, member);
+    }
+
+    public static void updateEntity(PostReqDto postReqDto, Post post, List<Image> images){
+        post.setTitle(postReqDto.title);
+        post.setText(postReqDto.text);
+        post.setFixed(postReqDto.fixed);
+        post.setImages(images);
     }
 
     @Data
@@ -63,6 +69,14 @@ public class PostDto {
             List<Image> images = post.getImages(); // 이거 접근지정 어케처리해야하지?
             if (images != null && !images.isEmpty()) {this.imageUri = images.get(0).getImageUri();}
         }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class PostDetailDto{
+        private String title;
+        private String text;
+        private List<Image> images;
     }
 
 

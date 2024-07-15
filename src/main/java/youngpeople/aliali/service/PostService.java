@@ -39,12 +39,21 @@ public class PostService {
     private final ClubRepository clubRepository;
     private final ImageRepository imageRepository;
 
-    public BasicResDto SavePost(PostDto.PostReqDto postReqDto, Long clubId, String kakaoId, List<MultipartFile> imageFiles) {
+    public BasicResDto savePost(PostReqDto postReqDto, Long clubId, PostType postType, String kakaoId, List<MultipartFile> imageFiles) {
+        // 고정된 post의 개수가 3개 이상일 때 막는 역할 코드 개선이 필요해보임
+        if(postReqDto.getFixed()){
+            List<Post> posts = postRepository.findByClubIdAndFixedAndPostType(clubId, true, postType);
+            if (posts.size() >= 3){
+                return BasicResDto.builder()
+                        .message("fail")
+                        .build();
+            }
+        }
         Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
         Club club = clubRepository.findById(clubId).orElseThrow(NotFoundEntityException::new);
 
         List<Image> images = new ArrayList<>();
-        Post post = toEntity(postReqDto, club, member);
+        Post post = toEntity(postReqDto, club, member, postType);
 
         for (MultipartFile imageFile : imageFiles) {
             Image image = null;
@@ -67,6 +76,44 @@ public class PostService {
                 .build();
     }
 
+    public BasicResDto modifyPost(PostReqDto postReqDto, Long clubId, Long postId, String kakaoId, List<MultipartFile> imageFiles){
+        Post originPost = postRepository.findById(postId).orElseThrow(NotFoundEntityException::new);
+        if (Boolean.FALSE.equals(originPost.getFixed()) && postReqDto.getFixed()){
+            List<Post> posts = postRepository.findByClubIdAndFixedAndPostType(clubId, true, originPost.getPostType());
+            if (posts.size() >= 3){
+                return BasicResDto.builder()
+                        .message("fail")
+                        .build();
+            }
+        }
+
+        Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
+        Club club = clubRepository.findById(clubId).orElseThrow(NotFoundEntityException::new);
+
+        List<Image> images = new ArrayList<>();
+        //기존이미지 삭제로직필요
+
+        // 데이터 삽입과 공통코드 개선 필요
+        for (MultipartFile imageFile : imageFiles) {
+            Image image = null;
+            if (imageFile != null) {
+                String imageUrl = imageManager.imageSave(imageFile);
+                image = new Image(ImageTargetType.POST, imageUrl);
+            }
+            images.add(image);
+            if (image != null) {
+                image.setPost(originPost);
+                imageRepository.save(image);
+            }
+        }
+
+        updateEntity(postReqDto, originPost, images);
+
+        return BasicResDto.builder()
+                .message("successful")
+                .build();
+    }
+
     public PostListDto findPostList(Long clubId, int pageIdx, PostType postType){
         int pageSize = 10;
         PageRequest pageRequest = PageRequest.of(pageIdx - 1, pageSize);
@@ -79,4 +126,6 @@ public class PostService {
 
         return new PostListDto("successful", normalPosts, fixedPosts);
     }
+
+
 }
