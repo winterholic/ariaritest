@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import youngpeople.aliali.controller.BlockController;
 import youngpeople.aliali.dto.BasicResDto;
 import youngpeople.aliali.entity.member.Block;
 import youngpeople.aliali.entity.member.Member;
@@ -26,9 +27,9 @@ public class BlockService {
     /**
      * 게시글 댓글 보여줄 때 회원 id를 주실건가요 ?
      */
-    public BasicResDto createBlock(String kakaoId, Long targetId) {
+    public BasicResDto createBlock(String kakaoId, BlockController.BlockReqDto blockReqDto) {
         Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
-        Member target = memberRepository.findById(targetId).orElseThrow(NotFoundEntityException::new);
+        Member target = memberRepository.findById(blockReqDto.getTargetId()).orElseThrow(NotFoundEntityException::new);
 
         blockRepository.findByMemberAndTarget(member, target).ifPresent(m -> {
             throw new ExistingBlockException();
