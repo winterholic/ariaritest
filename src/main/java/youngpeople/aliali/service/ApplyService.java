@@ -16,7 +16,7 @@ import youngpeople.aliali.exception.apply.ApplyAuthorityException;
 import youngpeople.aliali.exception.apply.ExistingApplyException;
 import youngpeople.aliali.exception.apply.ExistingClubMemberException;
 import youngpeople.aliali.exception.apply.NotPendencyApplyException;
-import youngpeople.aliali.exception.clubmember.ClubMemberRoleAdminException;
+import youngpeople.aliali.exception.clubmember.ClubMemberRemoveAdminException;
 import youngpeople.aliali.exception.clubmember.ClubMemberRoleException;
 import youngpeople.aliali.exception.common.NotFoundEntityException;
 import youngpeople.aliali.repository.*;
@@ -116,7 +116,7 @@ public class ApplyService {
         ClubMember myClubMember = clubMemberRepository.findByMemberAndClub(member, club).orElseThrow(ClubMemberRoleException::new);
 
         if (myClubMember.getMemberRole().equals(MemberRole.GENERAL)) {
-            throw new ClubMemberRoleAdminException();
+            throw new ClubMemberRemoveAdminException();
         }
 
         List<Apply> applies = applyRepository.findAllById(applyProcessingDto.getApplyProcessingId());
