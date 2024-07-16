@@ -24,6 +24,17 @@ public class PostDto {
         private Boolean fixed;
     }
 
+    @Data
+    @NoArgsConstructor
+    public static class CommentReqDto{
+        private String text;
+        private Boolean secret;
+    }
+
+    public static Comment toEntity(CommentReqDto commentReqDto, Post post, Member member){
+        return new Comment(post, member, commentReqDto.text, commentReqDto.secret);
+    }
+
     public static Post toEntity(PostReqDto postReqDto, Club club, Member member, PostType postType) {
         return new Post(postReqDto.title, postReqDto.text, postReqDto.fixed, postType, club, member);
     }
@@ -37,17 +48,56 @@ public class PostDto {
 
     @Data
     @NoArgsConstructor
-    public static class PostListDto{
+    public static class MainPagePostListDto{
+        private String message;
+        private List<PostSimpleContent> PostList = new ArrayList<>();
+        public MainPagePostListDto(String message, List<Post> posts) {
+            this.message = message;
+            for(Post post : posts){
+                PostList.add(new PostSimpleContent(post));
+            }
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class ImageListDto{
+        private String message;
+        private List<String> imageList = new ArrayList<>();
+        public ImageListDto(String message, List<Image> images) {
+            this.message = message;
+            for(Image image : images){
+                imageList.add(image.getImageUri());
+            }
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class NoticePostListDto{
         private String message;
         private List<PostSimpleContent> normalPostList = new ArrayList<>();
         private List<PostSimpleContent> fixedPostList = new ArrayList<>();
-        public PostListDto(String message, List<Post> normalPosts, List<Post> fixedPosts) {
+        public NoticePostListDto(String message, List<Post> normalPosts, List<Post> fixedPosts) {
             this.message = message;
             for(Post post : normalPosts){
                 this.normalPostList.add(new PostSimpleContent(post));
             }
             for(Post post : fixedPosts){
                 this.fixedPostList.add(new PostSimpleContent(post));
+            }
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class GeneralPostListDto{
+        private String message;
+        private List<PostSimpleContent> PostList = new ArrayList<>();
+        public GeneralPostListDto(String message, List<Post> posts) {
+            this.message = message;
+            for(Post post : posts){
+                PostList.add(new PostSimpleContent(post));
             }
         }
     }
@@ -97,7 +147,9 @@ public class PostDto {
         public CommentListDto(String message, Post post){
             this.message = message;
             for (Comment parentcomment : post.getComments()){
-                parentCommentContents.add(new ParentCommentContent(post, parentcomment));
+                if(parentcomment.getActivated() || (!parentcomment.getChildrenComments().isEmpty())){ // 부모 댓글의 경우에는 대댓글이 없는 경우는 삭제된 경우 dto에 담지 않음
+                    parentCommentContents.add(new ParentCommentContent(post, parentcomment));
+                }
             }
         }
     }
@@ -126,8 +178,10 @@ public class PostDto {
             if(comment.getSecret() && post.getMember().equals(comment.getMember())){this.secret = false;}
             this.activated = comment.getActivated();
             for(Comment childComment : comment.getChildrenComments()){
-                ChildCommentContent childCommentContent = new ChildCommentContent(post, childComment);
-                childCommentList.add(childCommentContent);
+                if(childComment.getActivated()){ // 대댓글은 삭제됐으면 dto에 추가 x
+                    ChildCommentContent childCommentContent = new ChildCommentContent(post, childComment);
+                    childCommentList.add(childCommentContent);
+                }
             }
         }
     }

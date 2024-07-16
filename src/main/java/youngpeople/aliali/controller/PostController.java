@@ -50,13 +50,33 @@ public class PostController {
         return postService.modifyPost(postReqDto, clubId, postId, kakaoId, imageFiles);
     }
 
-    @GetMapping("/{postType}/list/{pageIdx}")
-    public PostListDto generalPostList(@PathVariable("clubId") Long clubId, @PathVariable("postType") PostType postType, @PathVariable("pageIdx") int pageIdx){
-        return postService.findPostList(clubId, pageIdx, postType);
+    @GetMapping("/list/thumbnail")
+    public MainPagePostListDto MainPagePostList(@PathVariable("clubId") Long clubId){
+        return postService.mainClubPagePostList(clubId);
     }
 
-//    @GetMapping("/images")
-//    public ImageListDto
+    @GetMapping("/image/thumbnail")
+    public ImageListDto MainPageImageList(@PathVariable("clubId") Long clubId){
+        return postService.mainClubPageImageList(clubId);
+    }
+
+    @GetMapping("/image/list/{pageIdx}")
+    public ImageListDto allImageList(@PathVariable("clubId") Long clubId, @PathVariable("pageIdx") int pageIdx){
+        return postService.findImageList(clubId, pageIdx);
+    } // 기획따라 달라질 것 같은데, 일단 전체를 한번에 로딩하면 유저입장에서 느릴테니 따로 구현했음
+
+    @GetMapping("/notice/list/{pageIdx}")
+    @SwaggerAuth
+    public NoticePostListDto noticePostList(@PathVariable("clubId") Long clubId, @PathVariable("pageIdx") int pageIdx){
+        return postService.findNoticePostList(clubId, pageIdx);
+    }
+
+    @GetMapping("/general/list/{pageIdx}")
+    @SwaggerAuth
+    public GeneralPostListDto generalPostList(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("pageIdx") int pageIdx){
+        String kakaoId = getKakaoId(request);
+        return postService.findGeneralPostList(kakaoId, clubId, pageIdx);
+    }
 
     @GetMapping("/{postId}")
     @SwaggerAuth

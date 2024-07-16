@@ -16,7 +16,7 @@ import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
 @NoArgsConstructor
-@Where(clause = "activated = true")
+//@Where(clause = "activated = true") // 비활성화된 댓글도 조회해야하는 경우가 있음
 @SQLDelete(sql = "UPDATE post SET activated = false WHERE comment_id = ?")
 @Getter
 public class Comment extends BaseEntity {
@@ -42,12 +42,11 @@ public class Comment extends BaseEntity {
     @OneToMany(fetch = LAZY)
     private List<Comment> childrenComments = new ArrayList<>();
 
-    public Comment(Post post, Member member, String text, Boolean secret, Comment parentComment) {
+    public Comment(Post post, Member member, String text, Boolean secret) {
         this.post = post;
         this.member = member;
         this.text = text;
         this.secret = secret;
-        this.parentComment = parentComment;
     }
 }
 
