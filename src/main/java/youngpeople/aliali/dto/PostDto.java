@@ -67,7 +67,7 @@ public class PostDto {
             this.NickName = post.getMember().getNickname();
             this.title = post.getTitle();
             this.createdDate = post.getCreatedDate();
-            List<Image> images = post.getImages(); // 이거 접근지정 어케처리해야하지?
+            List<Image> images = post.getImages(); // 이거 접근지정 어케처리해야하지? 이렇게 디폴트로 선언해도 지역변수로 사용되고 메모리에서 날아가나요?
             if (images != null && !images.isEmpty()) {this.imageUri = images.get(0).getImageUri();}
         }
     }
@@ -89,12 +89,19 @@ public class PostDto {
         }
     }
 
-//    @Data
-//    @NoArgsConstructor
-//    public static class CommentListDto{
-//
-//    }
-//
+    @Data
+    @NoArgsConstructor
+    public static class CommentListDto{
+        private String message;
+        private List<ParentCommentContent> parentCommentContents = new ArrayList<>();
+        public CommentListDto(String message, Post post){
+            this.message = message;
+            for (Comment parentcomment : post.getComments()){
+                parentCommentContents.add(new ParentCommentContent(post, parentcomment));
+            }
+        }
+    }
+
     @Data
     @NoArgsConstructor
     public static class ParentCommentContent{
@@ -105,6 +112,8 @@ public class PostDto {
         private String text;
         private LocalDateTime createdDate;
         private Boolean secret;
+        private Boolean activated;
+        private Boolean visualized = true;
         private List<ChildCommentContent> childCommentList;
         public ParentCommentContent(Post post, Comment comment){
             this.commentId = comment.getId();
@@ -115,8 +124,10 @@ public class PostDto {
             this.createdDate = comment.getCreatedDate();
             this.secret = comment.getSecret();
             if(comment.getSecret() && post.getMember().equals(comment.getMember())){this.secret = false;}
+            this.activated = comment.getActivated();
             for(Comment childComment : comment.getChildrenComments()){
-
+                ChildCommentContent childCommentContent = new ChildCommentContent(post, childComment);
+                childCommentList.add(childCommentContent);
             }
         }
     }
@@ -145,6 +156,23 @@ public class PostDto {
             }
         }
     }
-
-
 }
+
+// post에 대한 이슈부분들 정리
+// 1. 우선 메인에 보이는 post목록은 비회원도 볼 수 있으므로 따로 api를 구성
+// 2. 게시판에 들어가서 보이는 post목록들은 비회원은 못보도록 제공함 차단회원을 걸러내서 post로 제공
+// 3 - 1. 클럽 활동들에 대해서 사진으로 나온 부분은 비회원도 볼 수 있도록 함
+// 3 - 2. 따라서 공지사항 이외의 글들에서 이미지를 모두 가져와서 제공함
+// 4 - 1. post의 세부 내용을 제공할 때, 댓글과 같이 주기 vs 따로 api 제공하기에 대한 고민
+// 4 - 2. 댓글이 많을 경우에 유저 입장에서 조금이라도 빠른 피드백을 위해서는 후자가 맞음
+// 4 - 3. 책임분리에 대한 원리에 따라서도 후자를 따라가는 것이 좋음
+// 5 - 1. 댓글을 제공할 때, 차단에 따라서 구현 과정에서 분기점이 많이 나타나고 있음
+// 5 - 2. (나중에 고려)dto 중심으로 return을 제공하는 서비스의 구조를 개선하면 좀 더 좋을 것 같음.
+// 6 - 1. 댓글 리포지토리 구현할 때 activated검사를 필수조건에서 제외
+// 6 - 2. 삭제된 댓글 여부도 부모댓글인 경우에 알려야하기 때문
+// 7 - 1. 차단된 댓글을 어떻게 제공을 막을 것인지에 대한 고민
+// 7 - 2. 1안 dto에 애초에 담지 않는 방식, 그렇다면 currentuser까지 고려해야하는데 이거는 구조적인 문제가 있다고 생각
+// 7 - 3. 2안 dto에서 제거하는 방법, 서버에서 처리하기 때문에 담았다가 지우는 것이 그렇게 비효율적이라고 보이지 않음,
+// 7 - 4. 애초에 담지 않을 때에도 비교가 이루어지기 때문에 그에 준하는 작업소요가 소요될 것으로 우려
+// 7 - 5. 2안으로 진행하고 나중에 구조개선 후에 지우는 작업을 컨트롤러에서 해주면 좋을것 같다는 생각이 듬
+// 8. 댓글 수정기능 이거 구현하는 것이 그렇게 어려운 부분은 아닌데, 일단 어느정도 에브리타임의 기획을 따라가고 있으므로 배제하였음

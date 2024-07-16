@@ -112,8 +112,8 @@ public class PostService {
                 .build();
     }
 
+    // 차단유저 거르는거 수정해야함
     public PostListDto findPostList(Long clubId, int pageIdx, PostType postType){
-        //여기서도 차단한 유저 구분하도록 구현, 그러면 비로그인유저는 괜찮은건가? 비로그인유저에게도 메인이 보이는데, 메인이랑 API를 분해하는 식으로 해야할것 같음.
         int pageSize = 10;
         PageRequest pageRequest = PageRequest.of(pageIdx - 1, pageSize);
 
@@ -126,9 +126,13 @@ public class PostService {
         return new PostListDto("successful", normalPosts, fixedPosts);
     }
 
-    public PostDetailDto findDetailPost(String kakaoId, Long postId){
+    public PostDetailDto findDetailPost(Long postId){
         Post post = postRepository.findById(postId).orElseThrow(NotFoundEntityException::new);
+        return new PostDetailDto("successful", post);
+    }
 
+    public PostDetailDto filterBlockMembersDetailPost(PostDetailDto postDetailDto, String kakaoId, Long postId){
+        Post post = postRepository.findById(postId).orElseThrow(NotFoundEntityException::new);
         // 차단된 유저 조회 제한기능 개선 필수
         Member postAuthorMember = memberRepository.findByKakaoId(post.getMember().getKakaoId()).orElseThrow(NotFoundEntityException::new);
         Member currentMember = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
@@ -142,8 +146,38 @@ public class PostService {
                 return new PostDetailDto("fail", post); // fail부분들 논의 필요 // 이거 컨트롤러에서 해줘야할거같은데...
             }
         }
-        return new PostDetailDto("successful", post);
     }
 
+    public CommentListDto findCommentList(Long postId){
+        Post post = postRepository.findById(postId).orElseThrow(NotFoundEntityException::new);
+        return new CommentListDto("successful", post);
+    }
 
+    public CommentListDto filterBlockMembersCommentList(CommentListDto commentListDto, Long postId, String kakaoId){
+        Post post = postRepository.findById(postId).orElseThrow(NotFoundEntityException::new);
+
+        // 이거 코드 성능이 굉장히 안좋아보이는데 개선이 필요한데 어떻게 해야지...?
+        Member currentMember = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
+        List<Block> blockings = currentMember.getBlockings();
+        List<Block> blockeds = currentMember.getBlockeds();
+        List<Block> allBlocks = new ArrayList<>();
+        if (blockings != null) {allBlocks.addAll(blockings);}
+        if (blockeds != null) {allBlocks.addAll(blockeds);}
+        for(ParentCommentContent parentCommentContent : commentListDto.getParentCommentContents()){
+            for(Block block : allBlocks){
+                if (parentCommentContent.getCommentId().equals(block.getTarget().getId())){
+                    parentCommentContent.setVisualized(false);
+                    break;
+                }
+            }
+            for (ChildCommentContent childCommentContent : parentCommentContent.getChildCommentList()){
+                for (Block block : allBlocks){
+                    if(childCommentContent.getMemberId().equals(block.getTarget().getId())){
+                        parentCommentContent.getChildCommentList().remove(childCommentContent); // 자식 은 제거제거
+                    }
+                }
+            }
+        }
+        return commentListDto;
+    }
 }

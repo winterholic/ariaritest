@@ -62,12 +62,15 @@ public class PostController {
     @SwaggerAuth
     public PostDetailDto postDetails(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId){
         String kakaoId = getKakaoId(request);
-        return postService.findDetailPost(kakaoId, postId);
+        return postService.filterBlockMembersDetailPost(postService.findDetailPost(postId), kakaoId, postId);
     }
 
-//    @GetMapping("/{postId}/comment")
-//    @SwaggerAuth
-//    public CommentListDto
+    @GetMapping("/{postId}/comment")
+    @SwaggerAuth
+    public CommentListDto allCommentList(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId){
+        String kakaoId = getKakaoId(request);
+        return postService.filterBlockMembersCommentList(postService.findCommentList(postId), clubId, kakaoId);
+    }
 
     private String getKakaoId(HttpServletRequest request) {
         return (String) request.getAttribute("kakaoId");
