@@ -11,6 +11,7 @@ import youngpeople.aliali.dto.BasicResDto;
 import youngpeople.aliali.dto.PostDto;
 import youngpeople.aliali.entity.Image;
 import youngpeople.aliali.entity.club.Club;
+import youngpeople.aliali.entity.club.Comment;
 import youngpeople.aliali.entity.club.Post;
 import youngpeople.aliali.entity.enumerated.ImageTargetType;
 import youngpeople.aliali.entity.enumerated.PostType;
@@ -18,10 +19,7 @@ import youngpeople.aliali.entity.member.Block;
 import youngpeople.aliali.entity.member.Member;
 import youngpeople.aliali.exception.common.NotFoundEntityException;
 import youngpeople.aliali.manager.ImageManager;
-import youngpeople.aliali.repository.ClubRepository;
-import youngpeople.aliali.repository.ImageRepository;
-import youngpeople.aliali.repository.MemberRepository;
-import youngpeople.aliali.repository.PostRepository;
+import youngpeople.aliali.repository.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +40,7 @@ public class PostService {
     private final MemberRepository memberRepository;
     private final ClubRepository clubRepository;
     private final ImageRepository imageRepository;
+    private final CommentRepository commentRepository;
 
     public BasicResDto savePost(PostReqDto postReqDto, Long clubId, PostType postType, String kakaoId, List<MultipartFile> imageFiles) {
         // 고정된 post의 개수가 3개 이상일 때 막는 역할 코드 개선이 필요해보임
@@ -194,13 +193,33 @@ public class PostService {
         Optional.ofNullable(postAuthorMember.getBlockeds()).ifPresent(allBlocks::addAll);
         for (Block block : allBlocks) {
             if (currentMember.equals(block.getTarget())){
-                return new PostDetailDto("fail", post); // fail부분들 논의 필요 // 이거 컨트롤러에서 해줘야할거같은데...
+                return new PostDetailDto("fail", post); // fail부분들 수정해야함 // 근데 이거 기능이 너무 많아져서 이거 컨트롤러에서 해줘야할거같은데...
             }
         }
         return postDetailDto;
     }
 
-    public BasicResDto saveParentComment(){
+    public BasicResDto saveParentComment(CommentReqDto commentReqDto, String kakaoId, Long postId){
+        Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
+        Post post = postRepository.findById(postId).orElseThrow(NotFoundEntityException::new);
+        // 애초에 차단한 유저는 보이지가 않기 때문에 따로 구현안해도 될 것 같음(?)
+        Comment comment = toEntity(commentReqDto, post, member);
+        commentRepository.save(comment);
+        return BasicResDto.builder()
+                .message("successful")
+                .build();
+    }
+
+    public BasicResDto saveChildComment(CommentReqDto commentReqDto, String kakaoId, Long postId, Long parentCommentId){
+        Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
+        Post post = postRepository.findById(postId).orElseThrow(NotFoundEntityException::new);
+        // 애초에 차단한 유저는 보이지가 않기 때문에 따로 구현안해도 될 것 같음(?)
+        Comment parentComment = commentRepository.findByIdAndActivatedTrue(parentCommentId).orElseThrow(NotFoundEntityException::new);
+        // 대댓글을 달려했는데, 부모댓글이 삭제된 경우를 고려
+        Comment childComment = toEntity(commentReqDto, post, member, parentComment);
+        commentRepository.save(childComment);
+        parentComment.addChildComment(childComment);
+        commentRepository.save(parentComment);
         return BasicResDto.builder()
                 .message("successful")
                 .build();
@@ -235,6 +254,12 @@ public class PostService {
                 }
             }
         }
+//        이 코드를 이용해서 리포지토리에서 blockedMembers로 찾아와서 서비스에서 여러과정에 걸쳐서 dto에 넣는 코드도 구상해볼 수 있을 것 같음
+//        List<Member> blockedMembers = new ArrayList<>();
+//        for (Block block : allBlocks){
+//            blockedMembers.add(block.getTarget());
+//        }
+
         return commentListDto;
     }
 }

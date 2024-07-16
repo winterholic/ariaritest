@@ -48,5 +48,17 @@ public class Comment extends BaseEntity {
         this.text = text;
         this.secret = secret;
     }
+
+    public Comment(Post post, Member member, String text, Boolean secret, Comment parentComment) {
+        this.post = post;
+        this.member = member;
+        this.text = text;
+        this.secret = secret;
+        this.parentComment = parentComment;
+    }
+
+    public void addChildComment(Comment childComment) {
+        this.childrenComments.add(childComment);
+    }
 }
 

@@ -24,6 +24,17 @@ public class PostDto {
         private Boolean fixed;
     }
 
+    public static Post toEntity(PostReqDto postReqDto, Club club, Member member, PostType postType) {
+        return new Post(postReqDto.title, postReqDto.text, postReqDto.fixed, postType, club, member);
+    }
+
+    public static void updateEntity(PostReqDto postReqDto, Post post, List<Image> images){
+        post.setTitle(postReqDto.title);
+        post.setText(postReqDto.text);
+        post.setFixed(postReqDto.fixed);
+        post.setImages(images);
+    }
+
     @Data
     @NoArgsConstructor
     public static class CommentReqDto{
@@ -35,15 +46,8 @@ public class PostDto {
         return new Comment(post, member, commentReqDto.text, commentReqDto.secret);
     }
 
-    public static Post toEntity(PostReqDto postReqDto, Club club, Member member, PostType postType) {
-        return new Post(postReqDto.title, postReqDto.text, postReqDto.fixed, postType, club, member);
-    }
-
-    public static void updateEntity(PostReqDto postReqDto, Post post, List<Image> images){
-        post.setTitle(postReqDto.title);
-        post.setText(postReqDto.text);
-        post.setFixed(postReqDto.fixed);
-        post.setImages(images);
+    public static Comment toEntity(CommentReqDto commentReqDto, Post post, Member member, Comment parrentComment){
+        return new Comment(post, member, commentReqDto.text, commentReqDto.secret, parrentComment);
     }
 
     @Data
@@ -230,3 +234,5 @@ public class PostDto {
 // 7 - 4. 애초에 담지 않을 때에도 비교가 이루어지기 때문에 그에 준하는 작업소요가 소요될 것으로 우려
 // 7 - 5. 2안으로 진행하고 나중에 구조개선 후에 지우는 작업을 컨트롤러에서 해주면 좋을것 같다는 생각이 듬
 // 8. 댓글 수정기능 이거 구현하는 것이 그렇게 어려운 부분은 아닌데, 일단 어느정도 에브리타임의 기획을 따라가고 있으므로 배제하였음
+// 9. 일반게시글은 고정 불가능 차단논리에 안맞음 공지글은 3개까지 고정
+// 10. 차단에 대한거 때문에 제대로 테스트가 되나 확인해봐야할듯...
