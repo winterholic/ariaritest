@@ -50,6 +50,13 @@ public class PostController {
         return postService.modifyPost(postReqDto, clubId, postId, kakaoId, imageFiles);
     }
 
+//    @DeleteMapping("{postId}")
+//    @SwaggerAuth
+//    public BasicResDto postDelete(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable Long postId){
+//        String kakaoId = getKakaoId(request);
+//        return new BasicResDto("success");
+//    }
+
     @GetMapping("/list/thumbnail")
     public MainPagePostListDto MainPagePostList(@PathVariable("clubId") Long clubId){
         return postService.mainClubPagePostList(clubId);
@@ -78,11 +85,28 @@ public class PostController {
         return postService.findGeneralPostList(kakaoId, clubId, pageIdx);
     }
 
+    //clubId를 안쓰는 친구들이 많은데 공통 매핑 빼버릴까?
     @GetMapping("/{postId}")
     @SwaggerAuth
     public PostDetailDto postDetails(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId){
         String kakaoId = getKakaoId(request);
         return postService.filterBlockMembersDetailPost(postService.findDetailPost(postId), kakaoId, postId);
+    }
+
+    @PostMapping("/{postId}/comment")
+    @SwaggerAuth
+    public BasicResDto parentCommentAdd(HttpServletRequest request, @PathVariable("postId") Long postId,
+                                        @PathVariable("clubId") Long clubId, @RequestBody CommentReqDto commentReqDto){
+        String kakaoId = getKakaoId(request);
+        return postService.saveParentComment(commentReqDto, kakaoId, postId);
+    }
+
+    @PostMapping("{postId}/{commentId}/comment")
+    @SwaggerAuth
+    public BasicResDto childCommentAdd(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId,
+                                       @PathVariable("commentId") Long commentId, @RequestBody CommentReqDto commentReqDto){
+        String kakaoId = getKakaoId(request);
+        return postService.saveChildComment(commentReqDto, kakaoId, postId, commentId);
     }
 
     @GetMapping("/{postId}/comment")
