@@ -24,7 +24,7 @@ public class AlarmDto {
     @AllArgsConstructor
     public static class AlarmsResDto {
         private String message;
-        private List<AlarmResDto> signalList;
+        private List<AlarmResDto> AlarmList;
     }
 
     public static AlarmsResDto fromEntity(String message, List<Alarm> alarms) {
