@@ -22,13 +22,24 @@ public class QAlarm extends EntityPathBase<Alarm> {
 
     public static final QAlarm alarm = new QAlarm("alarm");
 
+    public final youngpeople.aliali.entity.QBaseEntity _super = new youngpeople.aliali.entity.QBaseEntity(this);
+
+    //inherited
+    public final BooleanPath activated = _super.activated;
+
     public final BooleanPath checked = createBoolean("checked");
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdDate = _super.createdDate;
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final QMember member;
 
     public final StringPath message = createString("message");
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> updatedDate = _super.updatedDate;
 
     public final StringPath url = createString("url");
 

@@ -6,13 +6,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+import youngpeople.aliali.entity.BaseEntity;
 
 @Entity
 @NoArgsConstructor
 @Where(clause = "activated = true")
 @SQLDelete(sql = "UPDATE alarm SET activated = false WHERE alarm_id = ?")
 @Getter
-public class Alarm {
+public class Alarm extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "alarm_id")
