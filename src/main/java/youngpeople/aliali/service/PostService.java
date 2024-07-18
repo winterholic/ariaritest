@@ -18,13 +18,13 @@ import youngpeople.aliali.entity.enumerated.PostType;
 import youngpeople.aliali.entity.member.Block;
 import youngpeople.aliali.entity.member.Member;
 import youngpeople.aliali.exception.common.NotFoundEntityException;
+import youngpeople.aliali.exception.post.BlockedMemberAccessException;
 import youngpeople.aliali.exception.post.FixedCountException;
 import youngpeople.aliali.manager.ImageManager;
 import youngpeople.aliali.repository.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -77,6 +77,52 @@ public class PostService {
         return images;
     }
 
+    public void softDeleteImageData(Post originPost){
+        List<Image> images = originPost.getImages();
+        for (Image image : images) {
+            image.setActivated(false);
+        }
+        imageRepository.saveAll(images); // 테스트해보고 필요없으면 지움
+    }
+
+    public List<Member> findBlockMember(Member targetMember) {
+        List<Block> allBlocks = new ArrayList<>();
+        Optional.ofNullable(targetMember.getBlockings()).ifPresent(allBlocks::addAll);
+        Optional.ofNullable(targetMember.getBlockeds()).ifPresent(allBlocks::addAll);
+        List<Member> members = new ArrayList<>();
+        for(Block block : allBlocks){
+            members.add(block.getTarget());
+        }
+        return members;
+    }
+
+    public Set<Member> findBlockMemberSet(Member targetMember){
+        Set<Block> allBlocks = new HashSet<>();
+        Optional.ofNullable(targetMember.getBlockings()).ifPresent(allBlocks::addAll);
+        Optional.ofNullable(targetMember.getBlockeds()).ifPresent(allBlocks::addAll);
+
+        Set<Member> members = allBlocks.stream()
+                .map(Block::getTarget)
+                .collect(Collectors.toSet());
+        return members;
+    }
+
+    public void checkAbleToFindPost(Member currentMember, Member postAuthor){
+        Set<Member> blockMemberSet = findBlockMemberSet(postAuthor);
+        if(blockMemberSet.contains(currentMember)){
+            throw new BlockedMemberAccessException();
+        }
+    }
+
+
+
+
+
+
+
+
+
+
     public BasicResDto savePost(PostReqDto postReqDto, Long clubId, PostType postType, String kakaoId, List<MultipartFile> imageFiles) {
         checkFixablePostAtSaving(postReqDto, clubId);
 
@@ -100,7 +146,7 @@ public class PostService {
 
         checkFixablePostAtModifying(postReqDto, clubId, originPost);
 
-        //기존이미지 삭제로직필요
+        softDeleteImageData(originPost); // 이미지가 변경 되었는지 알 수 있는 데이터를 함께 받는다면, 좀 더 정밀한 코드개선이 필요
 
         List<Image> images = saveImageWithPost(imageFiles, originPost);
         updateEntity(postReqDto, originPost, images);
@@ -118,8 +164,6 @@ public class PostService {
         return new MainPagePostListDto("successful", posts);
     }
 
-    // 관리자는 차단 불가능하게 구현해야할듯
-    // 차단여부 상관없이 관리자 공지사항
     public NoticePostListDto findNoticePostList(Long clubId, int pageIdx){
         int pageSize = 10;
         PageRequest pageRequest = PageRequest.of(pageIdx - 1, pageSize);
@@ -133,14 +177,10 @@ public class PostService {
         return new NoticePostListDto("successful", normalPosts, fixedPosts);
     }
 
-    public ImageListDto mainClubPageImageList(Long clubId){
-        PageRequest pageRequest = PageRequest.of(0, 5); // 기획(디자인) 따라서 수정가능한 부분
-        List<Image> images = imageRepository.findByClubIdOrderByCreatedDateDesc(clubId, pageRequest);
-        return new ImageListDto("successful", images);
-    }
+    // findNoticeCommentList구현예정
 
-    public ImageListDto findImageList(Long clubId, int pageIdx){
-        PageRequest pageRequest = PageRequest.of(pageIdx, 25); // 기획(디자인) 따라서 수정 가능한 부분
+    public ImageListDto imageList(Long clubId, int pageIdx, int pageSize){
+        PageRequest pageRequest = PageRequest.of(pageIdx, pageSize);
         List<Image> images = imageRepository.findByClubIdOrderByCreatedDateDesc(clubId, pageRequest);
         return new ImageListDto("successful", images);
     }
@@ -149,14 +189,7 @@ public class PostService {
         int pageSize = 10;
         PageRequest pageRequest = PageRequest.of(pageIdx - 1, pageSize);
         Member currentMember = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
-        List<Block> allBlocks = new ArrayList<>();
-        Optional.ofNullable(currentMember.getBlockings()).ifPresent(allBlocks::addAll);
-        Optional.ofNullable(currentMember.getBlockeds()).ifPresent(allBlocks::addAll);
-        List<Member> members = new ArrayList<>();
-        for(Block block : allBlocks){
-            members.add(block.getTarget());
-        }
-        Page<Post> page = postRepository.findByMemberNotInAndClubIdAndPostTypeOrderByCreatedDateDesc(members, clubId, PostType.GENERAL, pageRequest);
+        Page<Post> page = postRepository.findByMemberNotInAndClubIdAndPostTypeOrderByCreatedDateDesc(findBlockMember(currentMember), clubId, PostType.GENERAL, pageRequest);
         List<Post> posts = page.hasContent() ? page.getContent() : List.of();
         return new GeneralPostListDto("successful", posts);
     }
@@ -170,21 +203,9 @@ public class PostService {
     public PostDetailDto filterBlockMembersDetailPost(PostDetailDto postDetailDto, String kakaoId, Long postId){
         Post post = postRepository.findById(postId).orElseThrow(NotFoundEntityException::new);
         // 차단된 유저 조회 제한기능 개선 필수
-        Member postAuthorMember = memberRepository.findByKakaoId(post.getMember().getKakaoId()).orElseThrow(NotFoundEntityException::new);
+        Member postAuthor = memberRepository.findByKakaoId(post.getMember().getKakaoId()).orElseThrow(NotFoundEntityException::new);
         Member currentMember = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
-//        List<Block> blockings = postAuthorMember.getBlockings();
-//        List<Block> blockeds = postAuthorMember.getBlockeds();
-//        List<Block> allBlocks = new ArrayList<>();
-//        if (blockings != null) {allBlocks.addAll(blockings);}
-//        if (blockeds != null) {allBlocks.addAll(blockeds);}
-        List<Block> allBlocks = new ArrayList<>();
-        Optional.ofNullable(postAuthorMember.getBlockings()).ifPresent(allBlocks::addAll);
-        Optional.ofNullable(postAuthorMember.getBlockeds()).ifPresent(allBlocks::addAll);
-        for (Block block : allBlocks) {
-            if (currentMember.equals(block.getTarget())){
-                return new PostDetailDto("fail", post); // fail부분들 수정해야함 // 근데 이거 기능이 너무 많아져서 이거 컨트롤러에서 해줘야할거같은데...
-            }
-        }
+        checkAbleToFindPost(currentMember, postAuthor);
         return postDetailDto;
     }
 

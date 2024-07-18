@@ -64,13 +64,13 @@ public class PostController {
 
     @GetMapping("/image/thumbnail")
     public ImageListDto MainPageImageList(@PathVariable("clubId") Long clubId){
-        return postService.mainClubPageImageList(clubId);
+        return postService.imageList(clubId, 0, 5);
     }
 
     @GetMapping("/image/list/{pageIdx}")
     public ImageListDto allImageList(@PathVariable("clubId") Long clubId, @PathVariable("pageIdx") int pageIdx){
-        return postService.findImageList(clubId, pageIdx);
-    } // 기획따라 달라질 것 같은데, 일단 전체를 한번에 로딩하면 유저입장에서 느릴테니 따로 구현했음
+        return postService.imageList(clubId, pageIdx, 25);
+    }
 
     @GetMapping("/notice/list/{pageIdx}")
     @SwaggerAuth
