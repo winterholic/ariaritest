@@ -101,7 +101,7 @@ public class MemberService {
                 .build();
     }
 
-    public BasicResDto authenticateSchool(String authToken) {
+    public void authenticateSchool(String authToken) {
         String kakaoId = tokenManager.getKakaoId(authToken);
         tokenManager.verifyAuthToken(authToken);
 
@@ -114,10 +114,6 @@ public class MemberService {
         School school = schoolRepository.findById(schoolId).orElseThrow(NotFoundEntityException::new);
 
         member.setSchool(school);
-
-        return BasicResDto.builder()
-                .message("successful")
-                .build();
     }
 
     /**

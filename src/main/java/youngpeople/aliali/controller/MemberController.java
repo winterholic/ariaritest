@@ -1,12 +1,15 @@
 package youngpeople.aliali.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import youngpeople.aliali.controller.swagger.SwaggerAuth;
 import youngpeople.aliali.dto.*;
 import youngpeople.aliali.service.MemberService;
+
+import java.io.IOException;
 
 import static youngpeople.aliali.dto.MemberDto.*;
 import static youngpeople.aliali.dto.SchoolDto.*;
@@ -65,8 +68,10 @@ public class MemberController {
 
     @GetMapping("/auth/school-certification")
     @MemberAuthenticationSchoolCheckExplain
-    public BasicResDto schoolAuth(@RequestParam(name = "authToken") String authToken) {
-        return memberService.authenticateSchool(authToken);
+    public void schoolAuth(@RequestParam(name = "authToken") String authToken,
+                                  HttpServletResponse response) throws IOException {
+        memberService.authenticateSchool(authToken);
+        response.sendRedirect("https://ariari.vercel.app");
     }
 
     private String getKakaoId(HttpServletRequest request) {
