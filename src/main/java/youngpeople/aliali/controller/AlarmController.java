@@ -20,7 +20,7 @@ public class AlarmController {
 
     @GetMapping("/list")
     @SwaggerAuth
-    public AlarmsResDto getAlarms(HttpServletRequest request) {
+    public AlarmsMiniResDto getAlarms(HttpServletRequest request) {
         String kakaoId = getKakaoId(request);
         return alarmService.findAlarms(kakaoId);
     }

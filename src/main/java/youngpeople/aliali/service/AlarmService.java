@@ -24,9 +24,9 @@ public class AlarmService {
     private final MemberRepository memberRepository;
     private final AlarmRepository alarmRepository;
 
-    public AlarmsResDto findAlarms(String kakaoId) {
+    public AlarmsMiniResDto findAlarms(String kakaoId) {
         Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
-        return fromEntity("successful", member.getAlarms());
+        return fromEntityAtMini("successful", member.getAlarms());
     }
 
     public BasicResDto checkAlarm(String kakaoId, Long alarmId) {
