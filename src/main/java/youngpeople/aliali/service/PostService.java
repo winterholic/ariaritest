@@ -18,6 +18,7 @@ import youngpeople.aliali.entity.enumerated.PostType;
 import youngpeople.aliali.entity.member.Block;
 import youngpeople.aliali.entity.member.Member;
 import youngpeople.aliali.exception.common.NotFoundEntityException;
+import youngpeople.aliali.exception.post.FixedCountException;
 import youngpeople.aliali.manager.ImageManager;
 import youngpeople.aliali.repository.*;
 
@@ -42,29 +43,25 @@ public class PostService {
     private final ImageRepository imageRepository;
     private final CommentRepository commentRepository;
 
-    public BasicResDto savePost(PostReqDto postReqDto, Long clubId, PostType postType, String kakaoId, List<MultipartFile> imageFiles) {
-        // 고정된 post의 개수가 3개 이상일 때 막는 역할 코드 개선이 필요해보임
-        // 공지일경우, 그리고 일반게시글인 경우로 나눠서 로직변경
-        // 공지만 상단 고정 가능하게 변경, 일반게시글을 고정할 때에 차단로직에 관한 논리가 꼬인다.
-        if(postReqDto.getFixed()){
-            if (postType.equals(PostType.GENERAL)){
-                return BasicResDto.builder()
-                        .message("fail")
-                        .build();
-            }
-            List<Post> posts = postRepository.findByClubIdAndFixedAndPostType(clubId, true, PostType.GENERAL);
-            if (posts.size() >= 3){
-                return BasicResDto.builder()
-                        .message("fail")
-                        .build();
-            }
+    public Boolean isFixable(Long clubId) {
+        //return (postRepository.findByClubIdAndFixedAndPostType(clubId, true, PostType.NOTICE).size() < 3);
+        return postRepository.CountByClubIdAndFixedAndPostType(clubId, true, PostType.NOTICE) < 3; // 고정개수 3개 이하인지 검사
+    }
+
+    public void checkFixablePostAtSaving(PostReqDto postReqDto, Long clubId) { // 게시글 작성 시 예외처리
+        if (postReqDto.getFixed() && !isFixable(clubId)) {
+            throw new FixedCountException();
         }
-        Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
-        Club club = clubRepository.findById(clubId).orElseThrow(NotFoundEntityException::new);
+    }
 
+    public void checkFixablePostAtModifying(PostReqDto postReqDto, Long clubId, Post originPost){ // 게시글 수정 시 예외처리
+        if(postReqDto.getFixed() && !originPost.getFixed() && !isFixable(clubId)){
+            throw new FixedCountException();
+        }
+    }
+
+    public List<Image> saveImageWithPost(List<MultipartFile> imageFiles, Post post){ // 이미지 저장처리
         List<Image> images = new ArrayList<>();
-        Post post = toEntity(postReqDto, club, member, postType);
-
         for (MultipartFile imageFile : imageFiles) {
             Image image = null;
             if (imageFile != null) {
@@ -77,7 +74,17 @@ public class PostService {
                 imageRepository.save(image);
             }
         }
+        return images;
+    }
 
+    public BasicResDto savePost(PostReqDto postReqDto, Long clubId, PostType postType, String kakaoId, List<MultipartFile> imageFiles) {
+        checkFixablePostAtSaving(postReqDto, clubId);
+
+        Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
+        Club club = clubRepository.findById(clubId).orElseThrow(NotFoundEntityException::new);
+        Post post = toEntity(postReqDto, club, member, postType);
+
+        List<Image> images = saveImageWithPost(imageFiles, post);
         post.setImages(images);
         postRepository.save(post);
 
@@ -86,35 +93,16 @@ public class PostService {
                 .build();
     }
 
-    public BasicResDto modifyPost(PostReqDto postReqDto, Long clubId, Long postId, String kakaoId, List<MultipartFile> imageFiles){
-        // 우리가 posttype을 인자로 안받는 경우로 그대로 구현하는 경우에 오류로직 구현은 프론트엔드에서 애초에 처리되어야할듯
-        Post originPost = postRepository.findById(postId).orElseThrow(NotFoundEntityException::new);
-        if (Boolean.FALSE.equals(originPost.getFixed()) && postReqDto.getFixed()){
-            List<Post> posts = postRepository.findByClubIdAndFixedAndPostType(clubId, true, originPost.getPostType());
-            if (posts.size() >= 3){
-                return BasicResDto.builder()
-                        .message("fail")
-                        .build();
-            }
-        }
 
-        List<Image> images = new ArrayList<>();
+
+    public BasicResDto modifyPost(PostReqDto postReqDto, Long clubId, Long postId, List<MultipartFile> imageFiles){
+        Post originPost = postRepository.findById(postId).orElseThrow(NotFoundEntityException::new);
+
+        checkFixablePostAtModifying(postReqDto, clubId, originPost);
+
         //기존이미지 삭제로직필요
 
-        // 데이터 삽입과 공통코드 개선 필요
-        for (MultipartFile imageFile : imageFiles) {
-            Image image = null;
-            if (imageFile != null) {
-                String imageUrl = imageManager.imageSave(imageFile);
-                image = new Image(ImageTargetType.POST, imageUrl);
-            }
-            images.add(image);
-            if (image != null) {
-                image.setPost(originPost);
-                imageRepository.save(image);
-            }
-        }
-
+        List<Image> images = saveImageWithPost(imageFiles, originPost);
         updateEntity(postReqDto, originPost, images);
 
         return BasicResDto.builder()
@@ -131,6 +119,7 @@ public class PostService {
     }
 
     // 관리자는 차단 불가능하게 구현해야할듯
+    // 차단여부 상관없이 관리자 공지사항
     public NoticePostListDto findNoticePostList(Long clubId, int pageIdx){
         int pageSize = 10;
         PageRequest pageRequest = PageRequest.of(pageIdx - 1, pageSize);
@@ -254,6 +243,7 @@ public class PostService {
                 }
             }
         }
+
 //        이 코드를 이용해서 리포지토리에서 blockedMembers로 찾아와서 서비스에서 여러과정에 걸쳐서 dto에 넣는 코드도 구상해볼 수 있을 것 같음
 //        List<Member> blockedMembers = new ArrayList<>();
 //        for (Block block : allBlocks){
@@ -263,3 +253,9 @@ public class PostService {
         return commentListDto;
     }
 }
+
+
+// 1. JPA 빼고 가져오는거야 member member select가 비효율,
+//
+// 2. 지금 한거 서비스는 하나의 비즈니스 검색 : 댓글검색 / 차단 댓글 필터링 -> X / dto변환
+// 3.

@@ -47,7 +47,7 @@ public class PostController {
                                @Parameter(description = "imageFiles") @RequestPart(name = "imageFiles") List<MultipartFile> imageFiles,
                                @Parameter(description = "postReqDto") @RequestPart(name = "postReqDto") PostDto.PostReqDto postReqDto){
         String kakaoId = getKakaoId(request);
-        return postService.modifyPost(postReqDto, clubId, postId, kakaoId, imageFiles);
+        return postService.modifyPost(postReqDto, clubId, postId, imageFiles);
     }
 
 //    @DeleteMapping("{postId}")
@@ -88,7 +88,7 @@ public class PostController {
     //clubId를 안쓰는 친구들이 많은데 공통 매핑 빼버릴까?
     @GetMapping("/{postId}")
     @SwaggerAuth
-    public PostDetailDto postDetails(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId){
+    public PostDetailDto postDetail(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId){
         String kakaoId = getKakaoId(request);
         return postService.filterBlockMembersDetailPost(postService.findDetailPost(postId), kakaoId, postId);
     }
