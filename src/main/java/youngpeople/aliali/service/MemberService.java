@@ -8,6 +8,7 @@ import youngpeople.aliali.dto.*;
 import youngpeople.aliali.entity.member.Member;
 import youngpeople.aliali.entity.member.School;
 import youngpeople.aliali.exception.common.NotFoundEntityException;
+import youngpeople.aliali.exception.member.AlreadyAuthException;
 import youngpeople.aliali.exception.member.WrongEmailException;
 import youngpeople.aliali.manager.MailManager;
 import youngpeople.aliali.repository.MemberRepository;
@@ -107,7 +108,7 @@ public class MemberService {
 
         Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
         if (member.getSchool() != null) {
-
+            throw  new AlreadyAuthException();
         }
 
         Long schoolId = Long.parseLong(tokenManager.getSchoolId(authToken));
