@@ -3,6 +3,7 @@ package youngpeople.aliali.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import youngpeople.aliali.service.MyService;
@@ -16,12 +17,13 @@ import static youngpeople.aliali.dto.MyDto.*;
  */
 @Slf4j
 @RestController
-@RequestMapping("my")
+@RequestMapping("/my")
 @RequiredArgsConstructor
 public class MyController {
 
     private final MyService myService;
 
+    @GetMapping("/clubs")
     public MyClubListResDto getMyClubs(HttpServletRequest request) {
         String kakaoId = getKakaoId(request);
 
