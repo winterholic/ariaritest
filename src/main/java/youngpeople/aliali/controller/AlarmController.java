@@ -18,11 +18,19 @@ public class AlarmController {
 
     private final AlarmService alarmService;
 
-    @GetMapping("/list")
+    @GetMapping("/mini")
     @SwaggerAuth
-    public AlarmsMiniResDto getAlarms(HttpServletRequest request) {
+    public AlarmsMiniResDto getAlarmsMini(HttpServletRequest request) {
         String kakaoId = getKakaoId(request);
         return alarmService.findAlarmsMini(kakaoId);
+    }
+
+    @GetMapping("/list")
+    @SwaggerAuth
+    public AlarmsPageResDto getAlarmsPage(HttpServletRequest request,
+                                          @RequestParam(name = "page-idx") int pageIdx) {
+        String kakaoId = getKakaoId(request);
+        return alarmService.findAlarmsPage(kakaoId, pageIdx);
     }
 
     @GetMapping("/{alarmId}")

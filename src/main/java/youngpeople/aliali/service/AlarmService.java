@@ -3,6 +3,7 @@ package youngpeople.aliali.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import youngpeople.aliali.alarm.AlarmInfo;
@@ -25,12 +26,22 @@ public class AlarmService {
     private final MemberRepository memberRepository;
     private final AlarmRepository alarmRepository;
 
+    private final int PAGE_SIZE = 10;
+
     public AlarmsMiniResDto findAlarmsMini(String kakaoId) {
         Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
 
         Page<Alarm> alarmPage = alarmRepository.findTop5ByMemberOrderByCreatedDateDesc(member);
         return fromEntityAtMini("successful", alarmPage.getContent());
     }
+
+    public AlarmsPageResDto findAlarmsPage(String kakaoId, int pageIdx) {
+        Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
+
+        Page<Alarm> alarmPage = alarmRepository.findByMember(member, PageRequest.of(pageIdx, PAGE_SIZE));
+        return fromEntityAtPage("successful", alarmPage);
+    }
+
 
     public BasicResDto checkAlarm(String kakaoId, Long alarmId) {
         Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
