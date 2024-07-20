@@ -11,6 +11,7 @@ import youngpeople.aliali.dto.BasicResDto;
 import youngpeople.aliali.entity.Image;
 import youngpeople.aliali.entity.club.Club;
 import youngpeople.aliali.entity.club.Post;
+import youngpeople.aliali.entity.clubmember.ClubMember;
 import youngpeople.aliali.entity.enumerated.ImageTargetType;
 import youngpeople.aliali.entity.enumerated.PostType;
 import youngpeople.aliali.entity.member.Block;
@@ -121,9 +122,7 @@ public class PostService {
     }
 
     public void checkMemberOfAuthorityAtPost(Long memberId, Long clubId){
-        if(clubMemberRepository.findByMemberIdAndClubId(memberId, clubId).isPresent()){
-            throw new NotExistingInClubException();
-        }
+        clubMemberRepository.findByMemberIdAndClubId(memberId, clubId).orElseThrow(NotExistingInClubException::new);
     }
 
     public void checkOwnerOfPost(Member targetMember, Post post){
@@ -133,9 +132,7 @@ public class PostService {
     }
 
     public void checkAdminAuthorityOfPost(Member targetMember, Post post){
-        if(clubMemberRepository.findByMemberAndClub(targetMember, post.getClub()).isPresent()){
-            throw new ModifyingAutorityException();
-        }
+        clubMemberRepository.findByMemberAndClub(targetMember, post.getClub()).orElseThrow(ModifyingAutorityException::new);
     }
 
 
