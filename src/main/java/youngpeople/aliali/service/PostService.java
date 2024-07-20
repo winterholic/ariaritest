@@ -229,8 +229,10 @@ public class PostService {
     public ImageListDto imageList(Long clubId, int pageIdx, int pageSize){
         //이미지 리스트는 클럽의 비회원도 가능
         PageRequest pageRequest = PageRequest.of(pageIdx, pageSize);
-        List<Image> images = imageRepository.findByClubIdOrderByCreatedDateDesc(clubId, pageRequest);
-        return new ImageListDto("successful", images);
+        Page<Image> page = imageRepository.findByClubIdOrderByCreatedDateDesc(clubId, pageRequest);
+        int totalPages = page.getTotalPages();
+        List<Image> images = page.hasContent() ? page.getContent() : List.of();
+        return new ImageListDto("successful", images, totalPages);
     }
 
     public GeneralPostListDto findGeneralPostList(String kakaoId, Long clubId, int pageIdx){

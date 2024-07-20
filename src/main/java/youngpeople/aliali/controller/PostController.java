@@ -40,7 +40,7 @@ public class PostController {
 
     @PutMapping(value = "/{postId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     @SwaggerAuth
-    //@WritePostExplain
+    @ModifyPostExplain
     public BasicResDto postModify(HttpServletRequest request,
                                @PathVariable("clubId") Long clubId,
                                @PathVariable("postId") Long postId,
@@ -52,6 +52,7 @@ public class PostController {
 
     @PatchMapping(value = "{postId}") //패치 이런식으로 하는거 맞나요?
     @SwaggerAuth
+    @ModifyPostFixedExplain
     public BasicResDto postPatch(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId,
         @RequestBody FixedReqDto fixedReqDto){
         String kakaoId = getKakaoId(request);
@@ -60,28 +61,33 @@ public class PostController {
 
     @DeleteMapping("{postId}")
     @SwaggerAuth
+    @DeletePostExplain
     public BasicResDto postDelete(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable Long postId){
         String kakaoId = getKakaoId(request);
         return postService.deletePost(postId, kakaoId);
     }
 
     @GetMapping("/list/thumbnail")
+    @ThumnailPostsExplain
     public MainPagePostListDto MainPagePostList(@PathVariable("clubId") Long clubId){
         return postService.mainClubPagePostList(clubId);
     }
 
     @GetMapping("/image/thumbnail")
+    @ThumnailImagesExplain
     public ImageListDto MainPageImageList(@PathVariable("clubId") Long clubId){
         return postService.imageList(clubId, 0, 5);
     }
 
     @GetMapping("/image/list/{pageIdx}")
+    @ImageListExplain
     public ImageListDto allImageList(@PathVariable("clubId") Long clubId, @PathVariable("pageIdx") int pageIdx){
         return postService.imageList(clubId, pageIdx, 25);
     }
 
     @GetMapping("/notice/list/{pageIdx}")
     @SwaggerAuth
+    @NoticePostListExplain
     public NoticePostListDto noticePostList(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("pageIdx") int pageIdx){
         String kakaoId = getKakaoId(request);
         return postService.findNoticePostList(clubId, pageIdx, kakaoId);
@@ -89,6 +95,7 @@ public class PostController {
 
     @GetMapping("/general/list/{pageIdx}")
     @SwaggerAuth
+    @GeneralPostListExplain
     public GeneralPostListDto generalPostList(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("pageIdx") int pageIdx){
         String kakaoId = getKakaoId(request);
         return postService.findGeneralPostList(kakaoId, clubId, pageIdx);
@@ -96,6 +103,7 @@ public class PostController {
 
     @GetMapping("/general/{postId}")
     @SwaggerAuth
+    @GeneralPostDetailExplain
     public PostDetailDto generalPostDetail(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId){
         String kakaoId = getKakaoId(request);
         return postService.findGeneralPostDetail(kakaoId, postId, clubId);
@@ -103,6 +111,7 @@ public class PostController {
 
     @GetMapping("/notice/{postId}")
     @SwaggerAuth
+    @NoticePostDetailExplain
     public PostDetailDto NoticePostDetail(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId){
         String kakaoId = getKakaoId(request);
         return postService.findNoticePostDetail(kakaoId, postId, clubId);

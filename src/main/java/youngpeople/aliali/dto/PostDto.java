@@ -56,9 +56,11 @@ public class PostDto {
     @NoArgsConstructor
     public static class ImageListDto{
         private String message;
+        private int totalPages;
         private List<String> imageList = new ArrayList<>();
-        public ImageListDto(String message, List<Image> images) {
+        public ImageListDto(String message, List<Image> images, int totalPages) {
             this.message = message;
+            this.totalPages = totalPages;
             for(Image image : images){
                 imageList.add(image.getImageUri());
             }
