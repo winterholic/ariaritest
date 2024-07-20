@@ -47,15 +47,23 @@ public class PostController {
                                @Parameter(description = "imageFiles") @RequestPart(name = "imageFiles") List<MultipartFile> imageFiles,
                                @Parameter(description = "postReqDto") @RequestPart(name = "postReqDto") PostDto.PostReqDto postReqDto){
         String kakaoId = getKakaoId(request);
-        return postService.modifyPost(postReqDto, clubId, postId, imageFiles);
+        return postService.modifyPost(postReqDto, clubId, postId, kakaoId, imageFiles);
     }
 
-//    @DeleteMapping("{postId}")
-//    @SwaggerAuth
-//    public BasicResDto postDelete(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable Long postId){
-//        String kakaoId = getKakaoId(request);
-//        return new BasicResDto("success");
-//    }
+    @PatchMapping(value = "{postId}") //패치 이런식으로 하는거 맞나요?
+    @SwaggerAuth
+    public BasicResDto postPatch(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId,
+        @RequestBody FixedReqDto fixedReqDto){
+        String kakaoId = getKakaoId(request);
+        return postService.modifyFixedPost(postId, clubId, kakaoId, fixedReqDto.isFixed());
+    }
+
+    @DeleteMapping("{postId}")
+    @SwaggerAuth
+    public BasicResDto postDelete(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable Long postId){
+        String kakaoId = getKakaoId(request);
+        return postService.deletePost(postId, kakaoId);
+    }
 
     @GetMapping("/list/thumbnail")
     public MainPagePostListDto MainPagePostList(@PathVariable("clubId") Long clubId){
@@ -74,8 +82,9 @@ public class PostController {
 
     @GetMapping("/notice/list/{pageIdx}")
     @SwaggerAuth
-    public NoticePostListDto noticePostList(@PathVariable("clubId") Long clubId, @PathVariable("pageIdx") int pageIdx){
-        return postService.findNoticePostList(clubId, pageIdx);
+    public NoticePostListDto noticePostList(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("pageIdx") int pageIdx){
+        String kakaoId = getKakaoId(request);
+        return postService.findNoticePostList(clubId, pageIdx, kakaoId);
     }
 
     @GetMapping("/general/list/{pageIdx}")
@@ -85,35 +94,18 @@ public class PostController {
         return postService.findGeneralPostList(kakaoId, clubId, pageIdx);
     }
 
-    //clubId를 안쓰는 친구들이 많은데 공통 매핑 빼버릴까?
-    @GetMapping("/{postId}")
+    @GetMapping("/general/{postId}")
     @SwaggerAuth
-    public PostDetailDto postDetail(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId){
+    public PostDetailDto generalPostDetail(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId){
         String kakaoId = getKakaoId(request);
-        return postService.filterBlockMembersDetailPost(postService.findDetailPost(postId), kakaoId, postId);
+        return postService.findGeneralPostDetail(kakaoId, postId, clubId);
     }
 
-    @PostMapping("/{postId}/comment")
+    @GetMapping("/notice/{postId}")
     @SwaggerAuth
-    public BasicResDto parentCommentAdd(HttpServletRequest request, @PathVariable("postId") Long postId,
-                                        @PathVariable("clubId") Long clubId, @RequestBody CommentReqDto commentReqDto){
+    public PostDetailDto NoticePostDetail(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId){
         String kakaoId = getKakaoId(request);
-        return postService.saveParentComment(commentReqDto, kakaoId, postId);
-    }
-
-    @PostMapping("{postId}/{commentId}/comment")
-    @SwaggerAuth
-    public BasicResDto childCommentAdd(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId,
-                                       @PathVariable("commentId") Long commentId, @RequestBody CommentReqDto commentReqDto){
-        String kakaoId = getKakaoId(request);
-        return postService.saveChildComment(commentReqDto, kakaoId, postId, commentId);
-    }
-
-    @GetMapping("/{postId}/comment")
-    @SwaggerAuth
-    public CommentListDto allCommentList(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId){
-        String kakaoId = getKakaoId(request);
-        return postService.filterBlockMembersCommentList(postService.findCommentList(postId), clubId, kakaoId);
+        return postService.findNoticePostDetail(kakaoId, postId, clubId);
     }
 
     private String getKakaoId(HttpServletRequest request) {
