@@ -571,4 +571,48 @@ public class SwaggerExplain {
 
 
     //commentcontroller
+    @Operation(
+            summary = "댓글 달기",
+            description = "일반 댓글을 작성할 때, 대댓글이 아닌 부모댓글에 해당한다."
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface WriteParentCommentExplain {
+    }
+
+    @Operation(
+            summary = "대댓글 달기",
+            description = "대댓글을 작성할 때, 대댓글을 작성할 때만 해당한다."
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface WriteChildCommentExplain {
+    }
+
+    @Operation(
+            summary = "댓글 삭제하기",
+            description = "부모댓글이든 대댓글이든 삭제할 때 사용한다."
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface DeleteCommentExplain {
+    }
+
+    @Operation(
+            summary = "공지사항 댓글리스트 조회",
+            description = "공지사항에 있는 게시글의 댓글을 조회할 때 사용한다, 관리자도 차단하는 경우가 있을 수 있기 때문에, 공지사항의 게시글과 댓글은 모두 보여주기 위한 분리"
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface NoticeCommentListExplain {
+    }
+
+    @Operation(
+            summary = "일반게시글 댓글리스트 조회",
+            description = "일반게시글의 댓글리스트를 조회한다 이 때 차단된 유저에 대한 정보가 필터링된다, 관리자도 차단하는 경우가 있을 수 있기 때문에, 공지사항의 게시글과 댓글은 모두 보여주기 위한 분리"
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface GeneralCommentListExplain {
+    }
 }

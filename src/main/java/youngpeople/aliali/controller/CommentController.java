@@ -15,38 +15,50 @@ import static youngpeople.aliali.controller.swagger.SwaggerExplain.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/club/{clubId}") // clubId가 전혀 안필요한데 이거 어떻게 할지?
+@RequestMapping("/club/{clubId}") // clubId가 필요함 예외처리시에 필요
 public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/{postId}/comment")
     @SwaggerAuth
+    @WriteParentCommentExplain
     public BasicResDto parentCommentAdd(HttpServletRequest request, @PathVariable("postId") Long postId,
                                         @PathVariable("clubId") Long clubId, @RequestBody CommentReqDto commentReqDto){
         String kakaoId = getKakaoId(request);
-        return commentService.saveParentComment(commentReqDto, kakaoId, postId);
+        return commentService.saveParentComment(commentReqDto, kakaoId, postId, clubId);
     }
 
     @PostMapping("{postId}/{commentId}/comment")
     @SwaggerAuth
+    @WriteChildCommentExplain
     public BasicResDto childCommentAdd(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId,
                                        @PathVariable("commentId") Long commentId, @RequestBody CommentReqDto commentReqDto){
         String kakaoId = getKakaoId(request);
-        return commentService.saveChildComment(commentReqDto, kakaoId, postId, commentId);
+        return commentService.saveChildComment(commentReqDto, kakaoId, postId, commentId, clubId);
+    }
+
+    @DeleteMapping("{commentId}")
+    @SwaggerAuth
+    @DeleteCommentExplain
+    public BasicResDto deleteComment(HttpServletRequest request, @PathVariable("commentId") Long commentId){
+        String kakaoId = getKakaoId(request);
+        return commentService.DeleteComment(kakaoId, commentId);
     }
 
     @GetMapping("/notice/{postId}/comment")
     @SwaggerAuth
+    @NoticeCommentListExplain
     public NoticeCommentListDto noticeCommentList(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId){
         String kakaoId = getKakaoId(request);
-        return commentService.findNoticeCommentList(postId);
+        return commentService.findNoticeCommentList(postId, kakaoId, clubId);
     }
 
     @GetMapping("/general/{postId}/comment")
     @SwaggerAuth
+    @GeneralCommentListExplain
     public GeneralCommentListDto generalCommentList(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId){
         String kakaoId = getKakaoId(request);
-        return commentService.findGeneralCommentList(postId, kakaoId);
+        return commentService.findGeneralCommentList(postId, kakaoId, clubId);
     }
 
     private String getKakaoId(HttpServletRequest request) {

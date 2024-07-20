@@ -7,10 +7,14 @@ import org.springframework.transaction.annotation.Transactional;
 import youngpeople.aliali.dto.BasicResDto;
 import youngpeople.aliali.entity.club.Comment;
 import youngpeople.aliali.entity.club.Post;
+import youngpeople.aliali.entity.clubmember.ClubMember;
 import youngpeople.aliali.entity.member.Block;
 import youngpeople.aliali.entity.member.Member;
+import youngpeople.aliali.exception.clubmember.NotExistingInClubException;
+import youngpeople.aliali.exception.comment.ModifyingCommentAuthorityException;
 import youngpeople.aliali.exception.common.NotFoundEntityException;
 import youngpeople.aliali.exception.block.BlockedMemberAccessException;
+import youngpeople.aliali.repository.ClubMemberRepository;
 import youngpeople.aliali.repository.CommentRepository;
 import youngpeople.aliali.repository.MemberRepository;
 import youngpeople.aliali.repository.PostRepository;
@@ -28,6 +32,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
+    private final ClubMemberRepository clubMemberRepository;
 
     public Set<Member> findBlockMemberSet(Member targetMember){ //대상 멤버에 대한 blockmember들의 set 반환
         Set<Block> allBlocks = new HashSet<>();
@@ -57,10 +62,21 @@ public class CommentService {
         return set;
     }
 
-    public BasicResDto saveParentComment(CommentReqDto commentReqDto, String kakaoId, Long postId){
+    public void checkMemberOfAuthorityAtComment(Member member, Long clubId){
+        clubMemberRepository.findByMemberAndClubId(member, clubId).orElseThrow(NotExistingInClubException::new);
+    }
+
+    public void checkMemberOfAuthorityAtDeleteComment(Member member, Comment comment){
+        if(!member.equals(comment.getMember())){
+            throw new ModifyingCommentAuthorityException();
+        }
+    }
+
+    public BasicResDto saveParentComment(CommentReqDto commentReqDto, String kakaoId, Long postId, Long clubId){
         Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
         Post post = postRepository.findById(postId).orElseThrow(NotFoundEntityException::new);
 
+        checkMemberOfAuthorityAtComment(member, clubId);
         checkAbleToWriteComment(member, post.getMember());
 
         Comment comment = toEntity(commentReqDto, post, member);
@@ -70,11 +86,12 @@ public class CommentService {
                 .build();
     }
 
-    public BasicResDto saveChildComment(CommentReqDto commentReqDto, String kakaoId, Long postId, Long parentCommentId){
+    public BasicResDto saveChildComment(CommentReqDto commentReqDto, String kakaoId, Long postId, Long parentCommentId, Long clubId){
         Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
         Post post = postRepository.findById(postId).orElseThrow(NotFoundEntityException::new);
         Comment parentComment = commentRepository.findByIdAndActivatedTrue(parentCommentId).orElseThrow(NotFoundEntityException::new);
 
+        checkMemberOfAuthorityAtComment(member, clubId);
         checkAbleToWriteComment(member, parentComment.getMember());
 
         Comment childComment = toEntity(commentReqDto, post, member, parentComment);
@@ -86,18 +103,33 @@ public class CommentService {
                 .build();
     }
 
+    public BasicResDto DeleteComment(String kakaoId, Long commentId){
+        Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
+        Comment comment = commentRepository.findByIdAndActivatedTrue(commentId).orElseThrow(NotFoundEntityException::new);
+        checkMemberOfAuthorityAtDeleteComment(member, comment);
+        comment.setActivated(false);
+        commentRepository.save(comment);
+        return BasicResDto.builder()
+                .message("successful")
+                .build();
+    }
+
     // 공지사항에 작성된 게시글의 댓글의 경우 모든 댓글 반환
-    public NoticeCommentListDto findNoticeCommentList(Long postId){
+    public NoticeCommentListDto findNoticeCommentList(Long postId, String kakaoId, Long clubId){
         List<Comment> comments = commentRepository.findByPostIdAndParentCommentIdIsNull(postId);
+        Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
+        checkMemberOfAuthorityAtComment(member, clubId);
         Post post = postRepository.findById(postId).orElseThrow(NotFoundEntityException::new);
         return new NoticeCommentListDto("successful", post, comments);
     }
 
-    public GeneralCommentListDto findGeneralCommentList(Long postId, String kakaoId){
+    public GeneralCommentListDto findGeneralCommentList(Long postId, String kakaoId, Long clubId){
         List<Comment> allComments = commentRepository.findByPostId(postId);
 
         Member currentMember = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
         Set<Long> blockedCommentIdSet = searchBlockComments(allComments, findBlockMemberSet(currentMember));
+
+        checkMemberOfAuthorityAtComment(currentMember, clubId);
 
         Post post = postRepository.findById(postId).orElseThrow(NotFoundEntityException::new);
         List<Comment> parentComments = commentRepository.findByPostIdAndParentCommentIdIsNull(postId);
