@@ -193,7 +193,7 @@ public class PostService {
         checkOwnerOfPost(member, post);
         softDeleteImageData(post);
         post.setActivated(false);
-        postRepository.save(post); // 필요?
+        postRepository.delete(post); // 필요?
         return BasicResDto.builder()
                 .message("successful")
                 .build();

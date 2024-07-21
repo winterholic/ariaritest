@@ -107,8 +107,7 @@ public class CommentService {
         Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
         Comment comment = commentRepository.findByIdAndActivatedTrue(commentId).orElseThrow(NotFoundEntityException::new);
         checkMemberOfAuthorityAtDeleteComment(member, comment);
-        comment.setActivated(false);
-        commentRepository.save(comment);
+        commentRepository.delete(comment);
         return BasicResDto.builder()
                 .message("successful")
                 .build();
