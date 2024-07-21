@@ -15,6 +15,8 @@ import youngpeople.aliali.exception.common.NotMatchedEntitiesException;
 import youngpeople.aliali.repository.MemberRepository;
 import youngpeople.aliali.repository.AlarmRepository;
 
+import java.util.List;
+
 import static youngpeople.aliali.dto.AlarmDto.*;
 
 @Slf4j
@@ -31,8 +33,8 @@ public class AlarmService {
     public AlarmsMiniResDto findAlarmsMini(String kakaoId) {
         Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
 
-        Page<Alarm> alarmPage = alarmRepository.findTop5ByMemberOrderByCreatedDateDesc(member);
-        return fromEntityAtMini("successful", alarmPage.getContent());
+        List<Alarm> alarmPage = alarmRepository.findTop5ByMemberOrderByCreatedDateDesc(member);
+        return fromEntityAtMini("successful", alarmPage);
     }
 
     public AlarmsPageResDto findAlarmsPage(String kakaoId, int pageIdx) {
