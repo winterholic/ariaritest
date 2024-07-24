@@ -33,7 +33,7 @@ public class AlarmController {
         return alarmService.findAlarmsPage(kakaoId, pageIdx);
     }
 
-    @GetMapping("/{alarmId}")
+    @PostMapping("/{alarmId}")
     @SwaggerAuth
     public BasicResDto checkAlarm(HttpServletRequest request, @PathVariable(name = "alarmId") Long alarmId) {
         String kakaoId = getKakaoId(request);
