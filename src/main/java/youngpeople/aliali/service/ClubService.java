@@ -46,23 +46,6 @@ public class ClubService {
         return fromEntity(club, "successful");
     }
 
-    public ClubsResDto findMyClubs(String kakaoId) {
-        Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
-
-        List<ClubMember> clubMembers = clubMemberRepository.findByMember(member);
-
-        List<ClubResDto> clubResDtoList = new ArrayList<>();
-        for (ClubMember clubMember : clubMembers) {
-            Club club = clubMember.getClub();
-            Bookmark bookmark = bookmarkRepository.findByMemberAndClub(member, club).orElse(null);
-
-            ClubResDto clubResDto = ClubResDto.fromEntity(club, bookmark);
-            clubResDtoList.add(clubResDto);
-        }
-
-        return new ClubsResDto("successful", clubResDtoList);
-    }
-
     public ClubsResDto findBookmarkClubs(String kakaoId) {
         Member member = memberRepository.findByKakaoId(kakaoId).get();
         List<Bookmark> bookmarks = member.getBookmarks();
