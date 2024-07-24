@@ -55,7 +55,9 @@ public class MyDto {
         public MyClubData(Club club, MyClubStatusType myClubStatusType) {
             this.clubId = club.getId();
             this.clubName = club.getName();
-            this.clubProfileUri = club.getImage().getImageUri();
+            if (club.getImage() != null) {
+                this.clubProfileUri = club.getImage().getImageUri();
+            }
             this.myClubStatusType = myClubStatusType;
         }
     }
