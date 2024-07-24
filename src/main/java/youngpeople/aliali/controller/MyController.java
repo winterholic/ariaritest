@@ -23,7 +23,7 @@ public class MyController {
 
     private final MyService myService;
 
-    @GetMapping("/clubs")
+    @GetMapping("/club/list")
     public MyClubListResDto getMyClubs(HttpServletRequest request) {
         String kakaoId = getKakaoId(request);
 

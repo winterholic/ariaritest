@@ -27,6 +27,8 @@ public class QComment extends EntityPathBase<Comment> {
     //inherited
     public final BooleanPath activated = _super.activated;
 
+    public final ListPath<Comment, QComment> childrenComments = this.<Comment, QComment>createList("childrenComments", Comment.class, QComment.class, PathInits.DIRECT2);
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdDate = _super.createdDate;
 
