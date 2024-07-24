@@ -56,8 +56,9 @@ public class ClubDto {
         private String imageUrl;
         private Long schoolId;
         private String schoolName;
+        private int clubMemberCount;
 
-        public ClubDetailResDto(String message, Long clubId, String name, String introduction, ClubTypeA clubTypeA, ClubTypeB clubTypeB, String typeName) {
+        public ClubDetailResDto(String message, Long clubId, String name, String introduction, ClubTypeA clubTypeA, ClubTypeB clubTypeB, String typeName, int clubMemberCount) {
             this.message = message;
             this.clubId = clubId;
             this.name = name;
@@ -65,12 +66,13 @@ public class ClubDto {
             this.clubTypeA = clubTypeA;
             this.clubTypeB = clubTypeB;
             this.typeName = typeName;
+            this.clubMemberCount = clubMemberCount;
         }
     }
 
     public static ClubDetailResDto fromEntity(Club club, String message) {
         ClubDetailResDto clubDetailResDto = new ClubDetailResDto(message, club.getId(), club.getName(), club.getIntroduction(),
-                club.getClubTypeA(), club.getClubTypeB(), club.getTypeName());
+                club.getClubTypeA(), club.getClubTypeB(), club.getTypeName(), club.getClubMembers().size());
 
         Image image = club.getImage();
         if (image != null) {
