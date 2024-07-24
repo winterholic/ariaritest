@@ -6,8 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import youngpeople.aliali.controller.swagger.SwaggerAuth;
+import youngpeople.aliali.controller.swagger.SwaggerExplain;
+import youngpeople.aliali.dto.ClubDto;
 import youngpeople.aliali.service.MyService;
 
+import static youngpeople.aliali.controller.swagger.SwaggerExplain.*;
 import static youngpeople.aliali.dto.MyDto.*;
 
 /**
@@ -26,11 +30,16 @@ public class MyController {
     @GetMapping("/club/list")
     public MyClubListResDto getMyClubs(HttpServletRequest request) {
         String kakaoId = getKakaoId(request);
-
         return myService.findMyClubs(kakaoId);
     }
 
-
+    @GetMapping("/bookmark/list")
+    @SwaggerAuth
+    @ClubGetBookmarkExplain
+    public ClubDto.ClubsResDto getBookmarkClubs(HttpServletRequest request) {
+        String kakaoId = getKakaoId(request);
+        return myService.findBookmarkClubs(kakaoId);
+    }
 
     private String getKakaoId(HttpServletRequest request) {
         return (String) request.getAttribute("kakaoId");

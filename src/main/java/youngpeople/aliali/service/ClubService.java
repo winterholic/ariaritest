@@ -46,18 +46,6 @@ public class ClubService {
         return fromEntity(club, "successful");
     }
 
-    public ClubsResDto findBookmarkClubs(String kakaoId) {
-        Member member = memberRepository.findByKakaoId(kakaoId).get();
-        List<Bookmark> bookmarks = member.getBookmarks();
-
-        List<ClubResDto> clubResDtoList = new ArrayList<>();
-        for (Bookmark bookmark : bookmarks) {
-            clubResDtoList.add(ClubResDto.fromEntity(bookmark.getClub(), bookmark));
-        }
-
-        return new ClubsResDto("successful", clubResDtoList);
-    }
-
     public BasicResDto registerClub(ClubReqDto clubReqDto, String kakaoId, MultipartFile imageFile) {
         Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(NotFoundEntityException::new);
         School school = schoolRepository.findById(clubReqDto.getSchoolId()).orElse(null);

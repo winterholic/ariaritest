@@ -29,14 +29,6 @@ public class ClubController {
         return clubService.findClub(clubId);
     }
 
-    @GetMapping("/list/bookmark")
-    @SwaggerAuth
-    @ClubGetBookmarkExplain
-    public ClubsResDto getBookmarkClubs(HttpServletRequest request) {
-        String kakaoId = getKakaoId(request);
-        return clubService.findBookmarkClubs(kakaoId);
-    }
-
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     @SwaggerAuth
     @ClubRegisterExplain
