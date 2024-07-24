@@ -73,7 +73,7 @@ public class PostController {
         return postService.mainClubPagePostList(clubId);
     }
 
-    @GetMapping("/image/thumbnail")
+    @GetMapping("/images/thumbnail")
     @ThumnailImagesExplain
     public ImageListDto MainPageImageList(@PathVariable("clubId") Long clubId){
         return postService.imageList(clubId, 0, 5);
