@@ -45,7 +45,7 @@ public class CommentController {
         return commentService.DeleteComment(kakaoId, commentId);
     }
 
-    @GetMapping("/notice/{postId}/comment")
+    @GetMapping("/notice/{postId}/comments")
     @SwaggerAuth
     @NoticeCommentListExplain
     public NoticeCommentListDto noticeCommentList(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId){
@@ -53,7 +53,7 @@ public class CommentController {
         return commentService.findNoticeCommentList(postId, kakaoId, clubId);
     }
 
-    @GetMapping("/general/{postId}/comment")
+    @GetMapping("/general/{postId}/comments")
     @SwaggerAuth
     @GeneralCommentListExplain
     public GeneralCommentListDto generalCommentList(HttpServletRequest request, @PathVariable("clubId") Long clubId, @PathVariable("postId") Long postId){
@@ -66,10 +66,3 @@ public class CommentController {
     }
 }
 
-
-//해야하는 일 정리
-//delete구현 post + comment
-//1개 post 고정요청 구현
-//club멤버 아닌데 게시글 게시판 조회나 상세조회 막기
-//예외처리할 경우의수가 많은듯 기능이 많아서... 예외처리하기
-// 무슨오류가 있는지 모르겠는데 실행 안되네 인생망했네 별거아니었네 또 대소문자야?
