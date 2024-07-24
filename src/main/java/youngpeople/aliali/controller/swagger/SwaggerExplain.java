@@ -478,4 +478,141 @@ public class SwaggerExplain {
     @Retention(RetentionPolicy.RUNTIME)
     public @interface WritePostExplain {
     }
+
+    @Operation(
+            summary = "게시글 수정하기(스웨거 테스트 불가능)",
+            description = "스웨거 테스트 불가능"
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface ModifyPostExplain {
+    }
+
+    @Operation(
+            summary = "게시글 고정상황 수정하기",
+            description = "고정되지 않은 게시글을 고정하거나 고정된 게시글을 고정하지 않은 상태로 변경"
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface ModifyPostFixedExplain {
+    }
+
+    @Operation(
+            summary = "게시글 삭제하기",
+            description = "게시글 삭제하기, 게시글에 저장된 이미지는 논리삭제 처리됨(스케쥴러를 통해서 3달이후 삭제예정)"
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface DeletePostExplain {
+    }
+
+    @Operation(
+            summary = "썸네일 포스트 목록 가져오기",
+            description = "동아리 메인페이지에 노출될 썸네일 포스트 리스트를 가져오는 작업(일단 개수는 임의로 설정하였음), 클럽회원이 아니어도 조회 가능"
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface ThumnailPostsExplain {
+    }
+
+    @Operation(
+            summary = "썸네일 이미지 목록 가져오기",
+            description = "동아리 메인페이지에 노출될 썸네일 이미지 리스트를 가져오는 작업(일단 개수는 임의로 설정하였음), 클럽회원이 아니어도 조회 가능"
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface ThumnailImagesExplain {
+    }
+
+    @Operation(
+            summary = "이미지 목록 페이지별로 가져오기",
+            description = "이미지 상세 페이지에 노출될 이미지 리스트를 가져오는 작업(일단 개수는 임의로 설정하였음), 클럽회원이 아니어도 조회 가능"
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface ImageListExplain {
+    }
+
+    @Operation(
+            summary = "공지사항 게시글 리스트 페이지별로 가져오기",
+            description = "공지사항 게시글을 페이지별로 가져오기 고정된 개수는 일단 임의로 설정"
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface NoticePostListExplain {
+    }
+
+    @Operation(
+            summary = "일반게시판 게시글 리스트 페이지별로 가져오기",
+            description = "일반게시판 게시글을 페이지별로 가져오기, 공지사항과 달리 고정된 게시글이 없다."
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface GeneralPostListExplain {
+    }
+
+    @Operation(
+            summary = "일반게시판 게시글 상세정보 가져오기",
+            description = ".."
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface GeneralPostDetailExplain {
+    }
+
+    @Operation(
+            summary = "공지사항 게시판 게시글 상세정보 가져오기",
+            description = ".."
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface NoticePostDetailExplain {
+    }
+
+
+    //commentcontroller
+    @Operation(
+            summary = "댓글 달기",
+            description = "일반 댓글을 작성할 때, 대댓글이 아닌 부모댓글에 해당한다."
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface WriteParentCommentExplain {
+    }
+
+    @Operation(
+            summary = "대댓글 달기",
+            description = "대댓글을 작성할 때, 대댓글을 작성할 때만 해당한다."
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface WriteChildCommentExplain {
+    }
+
+    @Operation(
+            summary = "댓글 삭제하기",
+            description = "부모댓글이든 대댓글이든 삭제할 때 사용한다."
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface DeleteCommentExplain {
+    }
+
+    @Operation(
+            summary = "공지사항 댓글리스트 조회",
+            description = "공지사항에 있는 게시글의 댓글을 조회할 때 사용한다, 관리자도 차단하는 경우가 있을 수 있기 때문에, 공지사항의 게시글과 댓글은 모두 보여주기 위한 분리"
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface NoticeCommentListExplain {
+    }
+
+    @Operation(
+            summary = "일반게시글 댓글리스트 조회",
+            description = "일반게시글의 댓글리스트를 조회한다 이 때 차단된 유저에 대한 정보가 필터링된다, 관리자도 차단하는 경우가 있을 수 있기 때문에, 공지사항의 게시글과 댓글은 모두 보여주기 위한 분리"
+    )
+    @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface GeneralCommentListExplain {
+    }
 }

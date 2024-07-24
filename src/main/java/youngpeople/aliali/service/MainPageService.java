@@ -33,6 +33,7 @@ public class MainPageService {
     private final MemberRepository memberRepository;
     private final RecruitmentRepository recruitmentRepository;
 
+    // 정렬하는 부분들을 JPA적으로 개선할 수 있는 부분들이 있어서 개선이 필요해 보임
     public ClubAllDto findClubsAll(String kakaoId) {
         List<Club> clubs = clubRepository.findBySchool(null);
 

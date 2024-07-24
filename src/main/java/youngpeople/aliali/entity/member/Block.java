@@ -11,6 +11,9 @@ import static jakarta.persistence.FetchType.*;
 /**
  * 개발 및 테스트 시 주의
  */
+/**
+ * 개발 및 테스트 시 주의
+ */
 @Entity
 @NoArgsConstructor
 @Where(clause = "activated = true")

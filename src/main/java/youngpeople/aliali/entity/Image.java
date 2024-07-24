@@ -2,6 +2,7 @@ package youngpeople.aliali.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import youngpeople.aliali.entity.club.Club;
 import youngpeople.aliali.entity.club.Post;
@@ -9,6 +10,7 @@ import youngpeople.aliali.entity.club.Recruitment;
 import youngpeople.aliali.entity.enumerated.ImageTargetType;
 
 @Entity
+@NoArgsConstructor
 @Getter @Setter
 public class Image extends BaseEntity {
 
