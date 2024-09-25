@@ -142,7 +142,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
-          username: ubuntu
+          username: rsa-key-20240912
           key: ${{ secrets.KEY }}
           script: |
             sudo docker rm $(sudo docker ps -a)
