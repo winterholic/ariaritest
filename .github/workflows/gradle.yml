@@ -143,7 +143,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ubuntu
-          key: ${{ secrets.KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             sudo docker rm $(sudo docker ps -a)
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest  # latest 태그 이미지 가져오기
