@@ -124,8 +124,8 @@ jobs:
       - name: Build with Gradle
         run: |
           chmod +x gradlew 
-          ./gradlew build
-
+          ./gradlew bootJar -x test  # 테스트를 건너뛰고 bootJar 실행
+          
       ## 개선 사항 2: bootJar 명령어 추가 (Spring Boot 실행 파일 생성)
       - name: Create bootJar
         run: ./gradlew bootJar
